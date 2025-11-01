@@ -1,0 +1,135 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║         SISTEMA DE PSICOLOGÍA UCSS - INSTRUCCIONES                ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+⚠️  PROBLEMA ACTUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si ves este error en el navegador web:
+   "Error de conexión: ClientException: Failed to fetch"
+
+ES PORQUE:
+   ❌ El scraping NO funciona en navegadores web (Chrome/Edge)
+   ❌ Los navegadores bloquean peticiones por CORS
+   ❌ El portal UCSS no permite peticiones desde web
+
+
+✅  SOLUCIÓN (MUY FÁCIL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPCIÓN 1: Ejecutar en Windows Desktop (RECOMENDADO)
+──────────────────────────────────────────────────
+
+   Método A: Doble clic en el archivo
+   ───────────────────────────────────
+   → Haz doble clic en: EJECUTAR_AQUI.bat
+   → Espera que se abra la ventana de Windows
+   → ¡Listo! Ya funciona el scraping
+
+
+   Método B: Desde terminal
+   ─────────────────────────
+   1. Abre CMD o PowerShell
+   2. Navega a esta carpeta
+   3. Ejecuta: flutter run -d windows
+   4. ¡Listo!
+
+
+OPCIÓN 2: Ejecutar en Android (También funciona)
+─────────────────────────────────────────────────
+
+   1. Conecta tu celular Android (o abre emulador)
+   2. Ejecuta: flutter run -d android
+   3. ¡Listo!
+
+
+📊  DIFERENCIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Plataforma      | Scraping UCSS | Velocidad | Recomendado
+   ─────────────────────────────────────────────────────────
+   Windows Desktop |      ✅       |    ⚡⚡⚡   |     ⭐⭐⭐⭐⭐
+   Android         |      ✅       |    ⚡⚡    |     ⭐⭐⭐⭐
+   Web (Chrome)    |      ❌       |    ⚡⚡⚡   |     ⭐
+
+
+🔧  VERIFICAR DISPOSITIVOS DISPONIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Ejecuta en terminal:
+   → flutter devices
+
+   Deberías ver:
+   ✓ Windows (desktop)  - USAR ESTE
+   ✓ Chrome (web)       - NO FUNCIONA para scraping
+   ✓ Edge (web)         - NO FUNCIONA para scraping
+
+
+📝  PASOS PARA PROBAR EL SISTEMA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. ✅ Ejecuta: EJECUTAR_AQUI.bat
+      (o flutter run -d windows)
+
+   2. ✅ Se abrirá la aplicación en Windows
+
+   3. ✅ Haz clic en "Crear cuenta"
+
+   4. ✅ Ingresa:
+      - Código UCSS (10 dígitos)
+      - Contraseña del portal UCSS
+
+   5. ✅ El sistema validará contra:
+      https://intranet.ucss.edu.pe
+
+   6. ✅ Si las credenciales son correctas:
+      → Extrae tu nombre, facultad, programa
+      → Crea tu cuenta en Firebase
+      → ¡Registro exitoso!
+
+
+📚  DOCUMENTACIÓN ADICIONAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   SOLUCION_CORS.md     → Explicación detallada del problema CORS
+   RUN_WEB_DEV.md       → Cómo ejecutar en diferentes plataformas
+   UCSS_SCRAPING.md     → Cómo funciona el web scraping
+   FIREBASE_SETUP.md    → Configurar Firebase
+   README.md            → Documentación completa
+
+
+❓  PREGUNTAS FRECUENTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   P: ¿Por qué no funciona en web?
+   R: Los navegadores bloquean peticiones a otros dominios (CORS).
+      Es una medida de seguridad estándar.
+
+   P: ¿Es seguro el scraping?
+   R: Sí, solo valida credenciales. No almacena contraseñas.
+      Pero necesitas autorización de UCSS para producción.
+
+   P: ¿Funciona en móviles?
+   R: Sí, funciona perfecto en Android e iOS.
+
+   P: ¿Cómo lo uso en producción?
+   R: Para web en producción, necesitas un servidor proxy.
+      Ver SOLUCION_CORS.md para detalles.
+
+
+🚀  EJECUTA AHORA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   → Doble clic en: EJECUTAR_AQUI.bat
+
+   O en terminal:
+
+   → flutter run -d windows
+
+
+╔════════════════════════════════════════════════════════════════════╗
+║  ¡Todo listo! El scraping funciona en Windows/Android/iOS          ║
+║  Solo NO funciona en navegadores web por restricciones CORS        ║
+╚════════════════════════════════════════════════════════════════════╝
