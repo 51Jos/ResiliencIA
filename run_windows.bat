@@ -1,9 +1,9 @@
 @echo off
 echo ========================================
-echo  Sistema de Psicologia UCSS - Windows
+echo  ResiliencIA - Evaluacion Psicologica
+echo  UCSS - Windows Desktop
 echo ========================================
 echo.
-echo Ejecutando en Windows Desktop...
-echo (El scraping funciona perfecto aqui)
+echo Ejecutando aplicacion...
 echo.
 flutter run -d windows

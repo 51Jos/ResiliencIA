@@ -17,7 +17,11 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(git config:*)",
-      "Bash(gh auth status:*)"
+      "Bash(gh auth status:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh-keyscan:*)",
+      "Bash(~/.ssh/known_hosts)",
+      "Bash(del \"UCSS_SCRAPING.md\" \"COMO_PROBAR.md\" \"RUN_WEB_DEV.md\" \"SOLUCION_CORS.md\")"
     ],
     "deny": [],
     "ask": []

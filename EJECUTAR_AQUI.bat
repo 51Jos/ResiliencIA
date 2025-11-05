@@ -4,13 +4,14 @@ cls
 echo.
 echo  ╔═══════════════════════════════════════════════════╗
 echo  ║                                                   ║
-echo  ║     SISTEMA DE PSICOLOGIA UCSS - WINDOWS APP     ║
+echo  ║        RESILIENCIA - EVALUACION PSICOLOGICA      ║
+echo  ║                  UCSS - WINDOWS APP              ║
 echo  ║                                                   ║
 echo  ╚═══════════════════════════════════════════════════╝
 echo.
-echo  ✅ Esta version SI funciona con Web Scraping UCSS
-echo  ✅ No hay problemas de CORS
-echo  ✅ Listo para probar el registro!
+echo  ✅ Sistema de Deteccion de Ansiedad
+echo  ✅ Acompanamiento Emocional para Estudiantes
+echo  ✅ Listo para usar!
 echo.
 echo  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 echo.

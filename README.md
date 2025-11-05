@@ -1,20 +1,19 @@
-# Sistema de Psicología para Estudiantes UCSS
+# ResiliencIA - Sistema de Evaluación Psicológica UCSS
 
 Sistema de Detección de Ansiedad y Acompañamiento Emocional para estudiantes de la Universidad Católica Sedes Sapientiae.
 
 ## ⚡ INICIO RÁPIDO
 
-**¿Ves error de CORS en el navegador?** → Lee [LEEME_PRIMERO.txt](LEEME_PRIMERO.txt)
-
-**Solución rápida:**
+**Ejecutar la aplicación:**
 ```bash
-# Ejecuta en Windows Desktop (no web)
+# Windows Desktop
 flutter run -d windows
+
+# Android
+flutter run -d android
 
 # O haz doble clic en: EJECUTAR_AQUI.bat
 ```
-
-⚠️ **IMPORTANTE**: El web scraping **NO funciona en navegadores web** (Chrome/Edge) por restricciones CORS. Usa Windows Desktop, Android o iOS.
 
 ## Características
 
@@ -82,24 +81,16 @@ lib/
 
 4. **Ejecutar la aplicación**
 
-   **Opción A: Windows Desktop (RECOMENDADO)**
    ```bash
+   # Windows Desktop
    flutter run -d windows
-   # O ejecuta: run_windows.bat
-   ```
 
-   **Opción B: Android**
-   ```bash
+   # Android
    flutter run -d android
-   ```
 
-   **Opción C: Web (requiere CORS deshabilitado)**
-   ```bash
-   # Ejecuta primero: run_web_dev.bat
-   # Luego: flutter run -d chrome
+   # Web
+   flutter run -d chrome
    ```
-
-   Ver [RUN_WEB_DEV.md](RUN_WEB_DEV.md) para más detalles sobre CORS.
 
 ## Estructura de Componentes Globales
 
