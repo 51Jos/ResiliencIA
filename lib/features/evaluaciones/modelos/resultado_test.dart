@@ -137,16 +137,30 @@ class ActividadesRecomendadas {
           'Busca actividades recreativas que te relajen',
         ];
 
-      case NivelAnsiedad.grave:
+      case NivelAnsiedad.moderadaGrave:
         return [
-          'PRIORIDAD: Agenda una cita con el psicólogo del servicio',
+          'IMPORTANTE: Considera agendar una cita con el psicólogo del servicio',
           'Practica respiración diafragmática varias veces al día',
-          'Evita el aislamiento social, busca apoyo en personas de confianza',
-          'Establece una rutina diaria estructurada',
-          'Evita totalmente alcohol, cafeína y otras sustancias',
-          'Practica técnicas de grounding cuando sientas ansiedad intensa',
+          'Realiza ejercicio físico intenso para liberar tensión',
+          'Establece una rutina diaria estructurada y consistente',
+          'Evita totalmente alcohol, cafeína y sustancias estimulantes',
+          'Practica técnicas de grounding cuando sientas ansiedad',
+          'Mantén contacto regular con personas de confianza',
           'Considera técnicas de relajación guiada (audio/video)',
-          'Mantén un registro de situaciones que desencadenan ansiedad',
+          'Lleva un registro de situaciones que desencadenan ansiedad',
+        ];
+
+      case NivelAnsiedad.severa:
+        return [
+          'URGENTE: Agenda una cita con el psicólogo del servicio inmediatamente',
+          'Practica respiración profunda cada vez que sientas ansiedad',
+          'NO te aísles, busca apoyo en personas de confianza',
+          'Establece una rutina diaria muy estructurada',
+          'Elimina completamente alcohol, cafeína y otras sustancias',
+          'Practica técnicas de grounding regularmente',
+          'Considera actividades que te den sensación de control',
+          'Mantén un registro detallado de síntomas y desencadenantes',
+          'Busca grupos de apoyo o comunidades de ayuda',
         ];
     }
   }
@@ -160,10 +174,13 @@ class ActividadesRecomendadas {
         return 'Presentas ansiedad leve. Las actividades recomendadas te ayudarán a manejarla eficazmente. Practícalas con regularidad.';
 
       case NivelAnsiedad.moderada:
-        return 'Tu nivel de ansiedad es moderado. Es importante que sigas las recomendaciones de forma constante. Si los síntomas persisten después de 30 días, te derivaremos con un profesional.';
+        return 'Tu nivel de ansiedad es moderado. Es importante que sigas las recomendaciones de forma constante. Si los síntomas persisten después de 30 días, considera consultar con un profesional.';
 
-      case NivelAnsiedad.grave:
-        return 'Tu nivel de ansiedad requiere atención profesional. Hemos programado una derivación con el psicólogo del servicio. Mientras tanto, sigue las recomendaciones proporcionadas.';
+      case NivelAnsiedad.moderadaGrave:
+        return 'Tu nivel de ansiedad es moderado grave. Se recomienda atención profesional. Hemos programado una derivación con el psicólogo del servicio. Mientras tanto, sigue las recomendaciones proporcionadas.';
+
+      case NivelAnsiedad.severa:
+        return 'Tu nivel de ansiedad es severo y requiere atención profesional inmediata. Hemos programado una derivación urgente con el psicólogo del servicio. Por favor, sigue las recomendaciones y agenda tu cita lo antes posible.';
     }
   }
 }

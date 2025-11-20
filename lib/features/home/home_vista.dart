@@ -48,7 +48,9 @@ class _HomeVistaState extends State<HomeVista> {
         return Colors.blue;
       case NivelAnsiedad.moderada:
         return ColoresApp.advertencia;
-      case NivelAnsiedad.grave:
+      case NivelAnsiedad.moderadaGrave:
+        return Colors.deepOrange;
+      case NivelAnsiedad.severa:
         return ColoresApp.error;
     }
   }
@@ -61,7 +63,9 @@ class _HomeVistaState extends State<HomeVista> {
         return Icons.sentiment_satisfied;
       case NivelAnsiedad.moderada:
         return Icons.sentiment_neutral;
-      case NivelAnsiedad.grave:
+      case NivelAnsiedad.moderadaGrave:
+        return Icons.sentiment_dissatisfied;
+      case NivelAnsiedad.severa:
         return Icons.sentiment_very_dissatisfied;
     }
   }

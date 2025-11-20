@@ -21,7 +21,9 @@
       "Bash(git remote set-url:*)",
       "Bash(ssh-keyscan:*)",
       "Bash(~/.ssh/known_hosts)",
-      "Bash(del \"UCSS_SCRAPING.md\" \"COMO_PROBAR.md\" \"RUN_WEB_DEV.md\" \"SOLUCION_CORS.md\")"
+      "Bash(del \"UCSS_SCRAPING.md\" \"COMO_PROBAR.md\" \"RUN_WEB_DEV.md\" \"SOLUCION_CORS.md\")",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

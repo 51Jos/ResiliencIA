@@ -162,10 +162,10 @@ class InventarioBeck {
 
   /// Opciones estándar para cada pregunta del BAI
   static const List<OpcionRespuesta> _opcionesEstandar = [
-    OpcionRespuesta(valor: 0, texto: 'En absoluto'),
-    OpcionRespuesta(valor: 1, texto: 'Levemente (no me molesta mucho)'),
-    OpcionRespuesta(valor: 2, texto: 'Moderadamente (es desagradable pero puedo soportarlo)'),
-    OpcionRespuesta(valor: 3, texto: 'Severamente (casi no puedo soportarlo)'),
+    OpcionRespuesta(valor: 0, texto: 'Muy en desacuerdo'),
+    OpcionRespuesta(valor: 1, texto: 'En desacuerdo'),
+    OpcionRespuesta(valor: 2, texto: 'De acuerdo'),
+    OpcionRespuesta(valor: 3, texto: 'Muy de acuerdo'),
   ];
 
   /// Obtiene las preguntas por categoría
@@ -183,15 +183,22 @@ class InventarioBeck {
   }
 
   /// Calcula el nivel de ansiedad basado en el puntaje total
+  /// Baremo de corrección BAI:
+  /// - 10 a 18 puntos: Ansiedad Leve
+  /// - 19 a 25 puntos: Ansiedad Moderada
+  /// - 26 a 35 puntos: Ansiedad Moderada Grave
+  /// - 36 a 63 puntos: Ansiedad Severa
   static NivelAnsiedad calcularNivel(int puntajeTotal) {
-    if (puntajeTotal <= 7) {
+    if (puntajeTotal < 10) {
       return NivelAnsiedad.minima;
-    } else if (puntajeTotal <= 15) {
+    } else if (puntajeTotal <= 18) {
       return NivelAnsiedad.leve;
     } else if (puntajeTotal <= 25) {
       return NivelAnsiedad.moderada;
+    } else if (puntajeTotal <= 35) {
+      return NivelAnsiedad.moderadaGrave;
     } else {
-      return NivelAnsiedad.grave;
+      return NivelAnsiedad.severa;
     }
   }
 }
@@ -201,7 +208,8 @@ enum NivelAnsiedad {
   minima,
   leve,
   moderada,
-  grave;
+  moderadaGrave,
+  severa;
 
   String get nombre {
     switch (this) {
@@ -211,8 +219,10 @@ enum NivelAnsiedad {
         return 'Ansiedad Leve';
       case NivelAnsiedad.moderada:
         return 'Ansiedad Moderada';
-      case NivelAnsiedad.grave:
-        return 'Ansiedad Grave';
+      case NivelAnsiedad.moderadaGrave:
+        return 'Ansiedad Moderada Grave';
+      case NivelAnsiedad.severa:
+        return 'Ansiedad Severa';
     }
   }
 
@@ -224,12 +234,14 @@ enum NivelAnsiedad {
         return 'Nivel bajo de ansiedad. Puede manejarse con técnicas de relajación.';
       case NivelAnsiedad.moderada:
         return 'Nivel moderado de ansiedad. Se recomienda seguir las actividades sugeridas.';
-      case NivelAnsiedad.grave:
-        return 'Nivel alto de ansiedad. Se recomienda atención profesional.';
+      case NivelAnsiedad.moderadaGrave:
+        return 'Nivel moderado grave de ansiedad. Se recomienda atención profesional.';
+      case NivelAnsiedad.severa:
+        return 'Nivel severo de ansiedad. Se requiere atención profesional inmediata.';
     }
   }
 
   bool get requiereDerivacion {
-    return this == NivelAnsiedad.grave;
+    return this == NivelAnsiedad.moderadaGrave || this == NivelAnsiedad.severa;
   }
 }

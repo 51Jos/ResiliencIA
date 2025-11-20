@@ -209,11 +209,15 @@ class TestServicio {
       return false;
     }
 
-    // Verifica si ambos son graves o moderados
-    return (nivelActual == NivelAnsiedad.grave ||
-            nivelActual == NivelAnsiedad.moderada) &&
-        (testAnterior.nivelAnsiedad == NivelAnsiedad.grave ||
-            testAnterior.nivelAnsiedad == NivelAnsiedad.moderada) &&
+    // Verifica si ambos son graves (moderadaGrave o severa)
+    final nivelesGraves = [
+      NivelAnsiedad.moderada,
+      NivelAnsiedad.moderadaGrave,
+      NivelAnsiedad.severa
+    ];
+
+    return nivelesGraves.contains(nivelActual) &&
+        nivelesGraves.contains(testAnterior.nivelAnsiedad) &&
         nivelActual.index >= testAnterior.nivelAnsiedad.index;
   }
 
