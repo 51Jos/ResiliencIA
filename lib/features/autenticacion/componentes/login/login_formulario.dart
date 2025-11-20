@@ -102,9 +102,21 @@ class _LoginFormularioState extends State<LoginFormulario> {
     try {
       print('🔐 Login exitoso, verificando permisos para usuario: $usuarioId');
 
+      // Obtener datos del usuario PRIMERO para debugging
+      final authControlador = Provider.of<AuthControlador>(context, listen: false);
+      final datosUsuario = await authControlador.obtenerDatosUsuario();
+
+      print('📋 Datos del usuario en Firestore:');
+      print('   - Email: ${datosUsuario?['email']}');
+      print('   - Rol: ${datosUsuario?['rol']}');
+      print('   - Nombres: ${datosUsuario?['nombres']}');
+      print('   - Apellidos: ${datosUsuario?['apellidos']}');
+
       // Primero verificar si es administrador
       final administracionServicio = AdministracionServicio();
       final esAdmin = await administracionServicio.esAdministrador(usuarioId);
+
+      print('🔍 Resultado de esAdministrador(): $esAdmin');
 
       if (mounted) {
         if (esAdmin) {
