@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 /// Configuración de Firebase para la aplicación
 class ConfiguracionFirebase {
@@ -9,11 +10,24 @@ class ConfiguracionFirebase {
   static Future<void> inicializar() async {
     // Verifica si Firebase ya está inicializado
     try {
-      // Firebase leerá automáticamente:
-      // - android/app/google-services.json para Android
-      // - ios/Runner/GoogleService-Info.plist para iOS
-      // - Para Web, necesitas configurar las opciones manualmente
-      await Firebase.initializeApp();
+      if (kIsWeb) {
+        // Para Web, necesitamos configurar las opciones explícitamente
+        await Firebase.initializeApp(
+          options: const FirebaseOptions(
+            apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
+            appId: '1:645906943963:web:5cf2b35bc89a8c9a33a0b3',
+            messagingSenderId: '645906943963',
+            projectId: 'resiliencia-85ff4',
+            authDomain: 'resiliencia-85ff4.firebaseapp.com',
+            storageBucket: 'resiliencia-85ff4.firebasestorage.app',
+          ),
+        );
+      } else {
+        // Para Android/iOS, Firebase leerá automáticamente:
+        // - android/app/google-services.json para Android
+        // - ios/Runner/GoogleService-Info.plist para iOS
+        await Firebase.initializeApp();
+      }
     } catch (e) {
       // Si ya está inicializado, no hace nada
       if (e.toString().contains('duplicate-app')) {
