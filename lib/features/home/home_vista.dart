@@ -5,6 +5,9 @@ import '../autenticacion/controladores/auth_controlador.dart';
 import '../evaluaciones/servicios/test_servicio.dart';
 import '../evaluaciones/modelos/resultado_test.dart';
 import '../evaluaciones/modelos/pregunta_beck.dart';
+import '../administracion/servicios/administracion_servicio.dart';
+import '../administracion/vistas/lista_estudiantes_vista.dart';
+import '../administracion/guards/admin_guard.dart';
 
 /// Pantalla de prueba - Home
 class HomeVista extends StatefulWidget {
@@ -16,8 +19,10 @@ class HomeVista extends StatefulWidget {
 
 class _HomeVistaState extends State<HomeVista> {
   final TestServicio _testServicio = TestServicio();
+  final AdministracionServicio _administracionServicio = AdministracionServicio();
   ResultadoTest? _ultimoTest;
   bool _cargando = true;
+  bool _esAdministrador = false;
 
   @override
   void initState() {
@@ -30,14 +35,53 @@ class _HomeVistaState extends State<HomeVista> {
     final usuario = authControlador.usuarioActual;
 
     if (usuario != null) {
-      final test = await _testServicio.obtenerUltimoTest(usuario.uid);
+      // Verificar si es administrador
+      final esAdmin = await _administracionServicio.esAdministrador(usuario.uid);
+
+      // Solo cargar el test si es estudiante
+      ResultadoTest? test;
+      if (!esAdmin) {
+        test = await _testServicio.obtenerUltimoTest(usuario.uid);
+      }
+
       setState(() {
+        _esAdministrador = esAdmin;
         _ultimoTest = test;
         _cargando = false;
       });
     } else {
       setState(() => _cargando = false);
     }
+  }
+
+  Future<void> _navegarAAdministracion() async {
+    final authControlador = Provider.of<AuthControlador>(context, listen: false);
+    final usuario = authControlador.usuarioActual;
+
+    if (usuario == null) return;
+
+    // Obtener datos del usuario para el nombre
+    final datosUsuario = await authControlador.obtenerDatosUsuario();
+    final nombres = datosUsuario?['nombres'] ?? '';
+    final apellidos = datosUsuario?['apellidos'] ?? '';
+    final nombreCompleto = '$nombres $apellidos'.trim();
+    final nombreFinal = nombreCompleto.isNotEmpty ? nombreCompleto : 'Psicólogo';
+
+    if (!mounted) return;
+
+    // Navegar al panel de administración
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AdminGuard(
+          usuarioId: usuario.uid,
+          child: ListaEstudiantesVista(
+            psicologoId: usuario.uid,
+            psicologoNombre: nombreFinal,
+          ),
+        ),
+      ),
+    );
   }
 
   Color _getColorNivel(NivelAnsiedad nivel) {
@@ -412,6 +456,13 @@ class _HomeVistaState extends State<HomeVista> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // Botón para panel de administración (solo para psicólogos)
+          if (_esAdministrador)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings),
+              onPressed: _navegarAAdministracion,
+              tooltip: 'Panel de Administración',
+            ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -431,7 +482,7 @@ class _HomeVistaState extends State<HomeVista> {
           children: [
             // Bienvenida
             Text(
-              '¡Hola, ${usuario?.displayName ?? 'Estudiante'}!',
+              '¡Hola, ${usuario?.displayName ?? (_esAdministrador ? 'Psicólogo' : 'Estudiante')}!',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -439,17 +490,95 @@ class _HomeVistaState extends State<HomeVista> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Aquí está tu resumen de bienestar',
-              style: TextStyle(
+            Text(
+              _esAdministrador
+                  ? 'Accede al panel de administración para gestionar estudiantes'
+                  : 'Aquí está tu resumen de bienestar',
+              style: const TextStyle(
                 fontSize: 16,
                 color: ColoresApp.textoMedio,
               ),
             ),
             const SizedBox(height: 24),
 
-            // Resumen del último test
-            if (_ultimoTest != null) ...[
+            // Tarjeta especial para administradores
+            if (_esAdministrador) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      ColoresApp.primario,
+                      ColoresApp.primario.withValues(alpha: 0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: ColoresApp.primario.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.admin_panel_settings,
+                      size: 60,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Panel de Administración',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Gestiona estudiantes, revisa estadísticas y genera reportes',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: _navegarAAdministracion,
+                      icon: const Icon(Icons.dashboard, color: ColoresApp.primario),
+                      label: const Text(
+                        'Acceder al Panel',
+                        style: TextStyle(
+                          color: ColoresApp.primario,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Resumen del último test (solo para estudiantes)
+            if (_ultimoTest != null && !_esAdministrador) ...[
               // Tarjeta de nivel de ansiedad
               Container(
                 width: double.infinity,
@@ -699,8 +828,8 @@ class _HomeVistaState extends State<HomeVista> {
                   ),
                 ),
               ),
-            ] else ...[
-              // No hay test previo
+            ] else if (!_esAdministrador) ...[
+              // No hay test previo (solo para estudiantes)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),

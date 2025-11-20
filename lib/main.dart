@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'compartidos/tema/tema_app.dart';
 import 'features/autenticacion/controladores/auth_controlador.dart';
+import 'features/administracion/controladores/administracion_controlador.dart';
 import 'rutas/rutas_app.dart';
 import 'nucleo/configuracion_firebase.dart';
 
@@ -21,6 +22,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => AuthControlador(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdministracionControlador(),
         ),
       ],
       child: MaterialApp(

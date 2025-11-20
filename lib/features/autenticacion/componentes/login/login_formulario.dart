@@ -7,6 +7,9 @@ import 'login_boton.dart';
 import '../../../../compartidos/tema/colores_app.dart';
 import '../../../evaluaciones/servicios/test_servicio.dart';
 import '../../../evaluaciones/vistas/test_ansiedad_vista.dart';
+import '../../../administracion/servicios/administracion_servicio.dart';
+import '../../../administracion/vistas/lista_estudiantes_vista.dart';
+import '../../../administracion/guards/admin_guard.dart';
 
 /// Formulario de inicio de sesión
 class LoginFormulario extends StatefulWidget {
@@ -67,13 +70,49 @@ class _LoginFormularioState extends State<LoginFormulario> {
 
   Future<void> _verificarYRedirigir(String usuarioId) async {
     try {
-      print('🔐 Login exitoso, verificando test para usuario: $usuarioId');
-      final testServicio = TestServicio();
-      final necesitaTest = await testServicio.necesitaRealizarTest(usuarioId);
+      print('🔐 Login exitoso, verificando permisos para usuario: $usuarioId');
 
-      print('🎯 Necesita test: $necesitaTest');
+      // Primero verificar si es administrador
+      final administracionServicio = AdministracionServicio();
+      final esAdmin = await administracionServicio.esAdministrador(usuarioId);
 
       if (mounted) {
+        if (esAdmin) {
+          print('👨‍⚕️ Usuario es administrador, redirigiendo al panel de administración');
+          // Obtener datos del usuario para pasar el nombre
+          final authControlador = Provider.of<AuthControlador>(context, listen: false);
+          final datosUsuario = await authControlador.obtenerDatosUsuario();
+
+          final nombres = datosUsuario?['nombres'] ?? '';
+          final apellidos = datosUsuario?['apellidos'] ?? '';
+          final nombreCompleto = '$nombres $apellidos'.trim();
+          final nombreFinal = nombreCompleto.isNotEmpty ? nombreCompleto : 'Psicólogo';
+
+          if (!mounted) return;
+
+          // Redirige al panel de administración con guard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminGuard(
+                usuarioId: usuarioId,
+                child: ListaEstudiantesVista(
+                  psicologoId: usuarioId,
+                  psicologoNombre: nombreFinal,
+                ),
+              ),
+            ),
+          );
+          return;
+        }
+
+        // Si no es admin, verificar si es estudiante que necesita test
+        print('👨‍🎓 Usuario es estudiante, verificando test');
+        final testServicio = TestServicio();
+        final necesitaTest = await testServicio.necesitaRealizarTest(usuarioId);
+
+        print('🎯 Necesita test: $necesitaTest');
+
         if (necesitaTest) {
           print('➡️ Redirigiendo al test de ansiedad');
           // Redirige al test de ansiedad
@@ -90,7 +129,7 @@ class _LoginFormularioState extends State<LoginFormulario> {
         }
       }
     } catch (e) {
-      print('❌ Error al verificar test: $e');
+      print('❌ Error al verificar permisos: $e');
       // En caso de error, redirige al home
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
