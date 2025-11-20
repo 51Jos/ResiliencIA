@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 
 /// Configuración de Firebase para la aplicación
 class ConfiguracionFirebase {
@@ -10,9 +9,11 @@ class ConfiguracionFirebase {
   static Future<void> inicializar() async {
     // Verifica si Firebase ya está inicializado
     try {
-      await Firebase.initializeApp(
-        options: _obtenerOpciones(),
-      );
+      // Firebase leerá automáticamente:
+      // - android/app/google-services.json para Android
+      // - ios/Runner/GoogleService-Info.plist para iOS
+      // - Para Web, necesitas configurar las opciones manualmente
+      await Firebase.initializeApp();
     } catch (e) {
       // Si ya está inicializado, no hace nada
       if (e.toString().contains('duplicate-app')) {
@@ -22,42 +23,6 @@ class ConfiguracionFirebase {
       // Si es otro error, lo lanza
       rethrow;
     }
-  }
-
-  /// Obtiene las opciones de Firebase según la plataforma
-  static FirebaseOptions _obtenerOpciones() {
-    if (kIsWeb) {
-      // Configuración para Web
-      return const FirebaseOptions(
-        apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
-        appId: '1:645906943963:web:YOUR_WEB_APP_ID',
-        messagingSenderId: '645906943963',
-        projectId: 'resiliencia-85ff4',
-        authDomain: 'resiliencia-85ff4.firebaseapp.com',
-        storageBucket: 'resiliencia-85ff4.firebasestorage.app',
-      );
-    } else if (defaultTargetPlatform == TargetPlatform.android) {
-      // Configuración para Android
-      return const FirebaseOptions(
-        apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
-        appId: '1:645906943963:android:5cf2b35bc89a8c9a33a0b3',
-        messagingSenderId: '645906943963',
-        projectId: 'resiliencia-85ff4',
-        storageBucket: 'resiliencia-85ff4.firebasestorage.app',
-      );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // Configuración para iOS
-      return const FirebaseOptions(
-        apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
-        appId: '1:645906943963:ios:YOUR_IOS_APP_ID',
-        messagingSenderId: '645906943963',
-        projectId: 'resiliencia-85ff4',
-        storageBucket: 'resiliencia-85ff4.firebasestorage.app',
-        iosBundleId: 'com.example.resiliencia',
-      );
-    }
-
-    throw UnsupportedError('Plataforma no soportada');
   }
 }
 
