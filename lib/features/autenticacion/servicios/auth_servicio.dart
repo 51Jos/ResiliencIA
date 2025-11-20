@@ -188,25 +188,61 @@ class AuthServicio {
   String _manejarErrorAuth(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return 'No existe una cuenta con este correo electrónico';
+        return '❌ No existe una cuenta con este correo.\n\n'
+            '💡 ¿Es tu primera vez? Haz clic en "Crear cuenta" para registrarte.\n'
+            '💡 Verifica que escribiste correctamente tu correo @ucss.edu.pe';
+
       case 'wrong-password':
-        return 'Contraseña incorrecta';
-      case 'email-already-in-use':
-        return 'Ya existe una cuenta con este correo electrónico';
-      case 'weak-password':
-        return 'La contraseña es demasiado débil. Debe tener al menos 8 caracteres';
-      case 'invalid-email':
-        return 'El formato del correo electrónico no es válido';
-      case 'user-disabled':
-        return 'Esta cuenta ha sido deshabilitada';
-      case 'too-many-requests':
-        return 'Demasiados intentos fallidos. Intenta nuevamente más tarde';
-      case 'operation-not-allowed':
-        return 'Operación no permitida';
+        return '❌ Contraseña incorrecta.\n\n'
+            '💡 Verifica que escribiste correctamente tu contraseña.\n'
+            '💡 Recuerda que las contraseñas distinguen mayúsculas y minúsculas.';
+
       case 'invalid-credential':
-        return 'Las credenciales proporcionadas son incorrectas';
+        return '❌ Correo o contraseña incorrectos.\n\n'
+            '💡 Verifica que escribiste correctamente ambos campos.\n'
+            '💡 Asegúrate de usar tu correo @ucss.edu.pe';
+
+      case 'email-already-in-use':
+        return '❌ Ya existe una cuenta con este correo.\n\n'
+            '💡 Si ya tienes cuenta, usa "Iniciar sesión".\n'
+            '💡 Si olvidaste tu contraseña, contacta a soporte.';
+
+      case 'weak-password':
+        return '❌ Contraseña muy débil.\n\n'
+            '💡 Debe tener al menos 6 caracteres.\n'
+            '💡 Usa una combinación de letras, números y símbolos.';
+
+      case 'invalid-email':
+        return '❌ Formato de correo inválido.\n\n'
+            '💡 Verifica que sea un correo válido.\n'
+            '💡 Debe terminar en @ucss.edu.pe';
+
+      case 'user-disabled':
+        return '❌ Esta cuenta ha sido deshabilitada.\n\n'
+            '💡 Contacta al administrador del sistema.\n'
+            '📧 soporte@ucss.edu.pe';
+
+      case 'too-many-requests':
+        return '⏸️ Demasiados intentos fallidos.\n\n'
+            '💡 Por seguridad, espera unos minutos antes de intentar de nuevo.\n'
+            '💡 Si el problema persiste, contacta a soporte.';
+
+      case 'operation-not-allowed':
+        return '❌ Operación no permitida.\n\n'
+            '💡 Este método de autenticación no está habilitado.\n'
+            '💡 Contacta al administrador del sistema.';
+
+      case 'network-request-failed':
+        return '🌐 Error de conexión.\n\n'
+            '💡 Verifica tu conexión a internet.\n'
+            '💡 Intenta nuevamente en unos momentos.';
+
       default:
-        return 'Error de autenticación: ${e.message ?? e.code}';
+        // Mostrar código de error para debugging
+        return '❌ Error de autenticación: ${e.code}\n\n'
+            '💡 Si el problema persiste, contacta a soporte.\n'
+            '📧 soporte@ucss.edu.pe\n\n'
+            'Código de error: ${e.code}';
     }
   }
 }

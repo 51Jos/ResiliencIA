@@ -51,19 +51,49 @@ class _LoginFormularioState extends State<LoginFormulario> {
 
     // Muestra el resultado
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(resultado.mensaje),
-          backgroundColor: resultado.exito
-              ? ColoresApp.exito
-              : ColoresApp.error,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      if (resultado.exito) {
+        // Mensaje de éxito simple
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(resultado.mensaje),
+            backgroundColor: ColoresApp.exito,
+            duration: const Duration(seconds: 2),
+          ),
+        );
 
-      // Si fue exitoso, verifica si necesita test
-      if (resultado.exito && resultado.usuario != null) {
-        await _verificarYRedirigir(resultado.usuario!.uid);
+        // Si fue exitoso, verifica si necesita test
+        if (resultado.usuario != null) {
+          await _verificarYRedirigir(resultado.usuario!.uid);
+        }
+      } else {
+        // Mensaje de error detallado en un diálogo
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.error_outline, color: ColoresApp.error, size: 28),
+                SizedBox(width: 12),
+                Text('Error al iniciar sesión'),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Text(
+                resultado.mensaje,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
       }
     }
   }
