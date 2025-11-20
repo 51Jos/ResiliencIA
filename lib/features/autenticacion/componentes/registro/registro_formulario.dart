@@ -261,15 +261,16 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
           _buildTextField(
             controller: _correoController,
             label: 'Correo Universitario',
-            hint: 'ejemplo@ucss.edu.pe',
+            hint: 'ejemplo@ucss.pe',
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (valor) {
               if (valor == null || valor.isEmpty) {
                 return 'El correo es requerido';
               }
-              if (!valor.endsWith('@ucss.edu.pe')) {
-                return 'Debe ser un correo institucional (@ucss.edu.pe)';
+              // Acepta tanto @ucss.pe como @ucss.edu.pe
+              if (!valor.endsWith('@ucss.pe') && !valor.endsWith('@ucss.edu.pe')) {
+                return 'Debe ser un correo institucional UCSS (@ucss.pe o @ucss.edu.pe)';
               }
               return null;
             },

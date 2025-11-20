@@ -23,7 +23,9 @@
       "Bash(~/.ssh/known_hosts)",
       "Bash(del \"UCSS_SCRAPING.md\" \"COMO_PROBAR.md\" \"RUN_WEB_DEV.md\" \"SOLUCION_CORS.md\")",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

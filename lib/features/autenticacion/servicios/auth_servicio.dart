@@ -21,11 +21,11 @@ class AuthServicio {
     required String password,
   }) async {
     try {
-      // Valida que sea email institucional UCSS
-      if (!email.endsWith('@ucss.edu.pe')) {
+      // Valida que sea email institucional UCSS (acepta @ucss.pe y @ucss.edu.pe)
+      if (!email.endsWith('@ucss.pe') && !email.endsWith('@ucss.edu.pe')) {
         return ResultadoAuth(
           exito: false,
-          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.edu.pe)',
+          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.pe o @ucss.edu.pe)',
         );
       }
 
@@ -72,11 +72,11 @@ class AuthServicio {
     required String filial,
   }) async {
     try {
-      // Valida que sea email institucional UCSS
-      if (!correo.endsWith('@ucss.edu.pe')) {
+      // Valida que sea email institucional UCSS (acepta @ucss.pe y @ucss.edu.pe)
+      if (!correo.endsWith('@ucss.pe') && !correo.endsWith('@ucss.edu.pe')) {
         return ResultadoAuth(
           exito: false,
-          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.edu.pe)',
+          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.pe o @ucss.edu.pe)',
         );
       }
 
@@ -148,10 +148,11 @@ class AuthServicio {
   /// Envía email para restablecer contraseña
   Future<ResultadoAuth> restablecerPassword(String email) async {
     try {
-      if (!email.endsWith('@ucss.edu.pe')) {
+      // Valida que sea email institucional UCSS (acepta @ucss.pe y @ucss.edu.pe)
+      if (!email.endsWith('@ucss.pe') && !email.endsWith('@ucss.edu.pe')) {
         return ResultadoAuth(
           exito: false,
-          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.edu.pe)',
+          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.pe o @ucss.edu.pe)',
         );
       }
 
@@ -190,7 +191,7 @@ class AuthServicio {
       case 'user-not-found':
         return '❌ No existe una cuenta con este correo.\n\n'
             '💡 ¿Es tu primera vez? Haz clic en "Crear cuenta" para registrarte.\n'
-            '💡 Verifica que escribiste correctamente tu correo @ucss.edu.pe';
+            '💡 Verifica que escribiste correctamente tu correo institucional UCSS';
 
       case 'wrong-password':
         return '❌ Contraseña incorrecta.\n\n'
@@ -200,7 +201,7 @@ class AuthServicio {
       case 'invalid-credential':
         return '❌ Correo o contraseña incorrectos.\n\n'
             '💡 Verifica que escribiste correctamente ambos campos.\n'
-            '💡 Asegúrate de usar tu correo @ucss.edu.pe';
+            '💡 Asegúrate de usar tu correo institucional UCSS';
 
       case 'email-already-in-use':
         return '❌ Ya existe una cuenta con este correo.\n\n'
@@ -215,7 +216,7 @@ class AuthServicio {
       case 'invalid-email':
         return '❌ Formato de correo inválido.\n\n'
             '💡 Verifica que sea un correo válido.\n'
-            '💡 Debe terminar en @ucss.edu.pe';
+            '💡 Debe ser un correo institucional UCSS (@ucss.pe o @ucss.edu.pe)';
 
       case 'user-disabled':
         return '❌ Esta cuenta ha sido deshabilitada.\n\n'

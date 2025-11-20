@@ -15,8 +15,8 @@ class UsuarioCampo extends StatelessWidget {
   Widget build(BuildContext context) {
     return CampoTexto(
       etiqueta: 'Correo Institucional UCSS',
-      placeholder: 'codigo@ucss.edu.pe',
-      textoAyuda: 'Usa tu correo institucional @ucss.edu.pe',
+      placeholder: 'codigo@ucss.pe',
+      textoAyuda: 'Usa tu correo institucional UCSS',
       icono: Icons.email_outlined,
       controlador: controlador,
       tipoTeclado: TextInputType.emailAddress,

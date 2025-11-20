@@ -28,18 +28,19 @@ class Validadores {
     return null;
   }
 
-  /// Valida formato de email institucional UCSS
+  /// Valida formato de email institucional UCSS (acepta @ucss.pe y @ucss.edu.pe)
   static String? emailUCSS(String? valor) {
     if (valor == null || valor.isEmpty) {
       return null;
     }
 
+    // Acepta tanto @ucss.pe como @ucss.edu.pe
     final ucssEmailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@ucss\.edu\.pe$',
+      r'^[a-zA-Z0-9._%+-]+@ucss(\.edu)?\.pe$',
     );
 
     if (!ucssEmailRegex.hasMatch(valor)) {
-      return 'Usa tu correo institucional UCSS (ejemplo@ucss.edu.pe)';
+      return 'Usa tu correo institucional UCSS (@ucss.pe o @ucss.edu.pe)';
     }
 
     return null;
