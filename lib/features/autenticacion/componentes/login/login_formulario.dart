@@ -120,10 +120,8 @@ class _LoginFormularioState extends State<LoginFormulario> {
 
       if (mounted) {
         if (esAdmin) {
+          // ES ADMINISTRADOR (psicólogo) -> Panel de administración
           print('👨‍⚕️ Usuario es administrador, redirigiendo al panel de administración');
-          // Obtener datos del usuario para pasar el nombre
-          final authControlador = Provider.of<AuthControlador>(context, listen: false);
-          final datosUsuario = await authControlador.obtenerDatosUsuario();
 
           final nombres = datosUsuario?['nombres'] ?? '';
           final apellidos = datosUsuario?['apellidos'] ?? '';
@@ -148,25 +146,36 @@ class _LoginFormularioState extends State<LoginFormulario> {
           return;
         }
 
-        // Si no es admin, verificar si es estudiante que necesita test
-        print('👨‍🎓 Usuario es estudiante, verificando test');
-        final testServicio = TestServicio();
-        final necesitaTest = await testServicio.necesitaRealizarTest(usuarioId);
+        // NO ES ADMIN -> Verificar si es ESTUDIANTE
+        final rol = datosUsuario?['rol'] as String?;
 
-        print('🎯 Necesita test: $necesitaTest');
+        if (rol == 'estudiante') {
+          // ES ESTUDIANTE -> Verificar si necesita hacer el test
+          print('👨‍🎓 Usuario es estudiante, verificando si necesita test');
+          final testServicio = TestServicio();
+          final necesitaTest = await testServicio.necesitaRealizarTest(usuarioId);
 
-        if (necesitaTest) {
-          print('➡️ Redirigiendo al test de ansiedad');
-          // Redirige al test de ansiedad
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TestAnsiedadVista(usuarioId: usuarioId),
-            ),
-          );
+          print('🎯 Necesita test: $necesitaTest');
+
+          if (!mounted) return;
+
+          if (necesitaTest) {
+            print('➡️ Redirigiendo al test de ansiedad');
+            // Redirige al test de ansiedad
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TestAnsiedadVista(usuarioId: usuarioId),
+              ),
+            );
+          } else {
+            print('➡️ Redirigiendo al home (estudiante sin test pendiente)');
+            // Redirige al home
+            Navigator.pushReplacementNamed(context, '/home');
+          }
         } else {
-          print('➡️ Redirigiendo al home');
-          // Redirige al home
+          // Rol desconocido o no autorizado
+          print('⚠️ Rol desconocido: $rol - Redirigiendo al home');
           Navigator.pushReplacementNamed(context, '/home');
         }
       }
