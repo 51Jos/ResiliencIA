@@ -29,31 +29,31 @@ class ConfiguracionFirebase {
     if (kIsWeb) {
       // Configuración para Web
       return const FirebaseOptions(
-        apiKey: 'TU_API_KEY_WEB',
-        appId: 'TU_APP_ID_WEB',
-        messagingSenderId: 'TU_SENDER_ID',
-        projectId: 'TU_PROJECT_ID',
-        authDomain: 'TU_PROJECT_ID.firebaseapp.com',
-        storageBucket: 'TU_PROJECT_ID.appspot.com',
+        apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
+        appId: '1:645906943963:web:YOUR_WEB_APP_ID',
+        messagingSenderId: '645906943963',
+        projectId: 'resiliencia-85ff4',
+        authDomain: 'resiliencia-85ff4.firebaseapp.com',
+        storageBucket: 'resiliencia-85ff4.firebasestorage.app',
       );
     } else if (defaultTargetPlatform == TargetPlatform.android) {
       // Configuración para Android
       return const FirebaseOptions(
-        apiKey: 'TU_API_KEY_ANDROID',
-        appId: 'TU_APP_ID_ANDROID',
-        messagingSenderId: 'TU_SENDER_ID',
-        projectId: 'TU_PROJECT_ID',
-        storageBucket: 'TU_PROJECT_ID.appspot.com',
+        apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
+        appId: '1:645906943963:android:5cf2b35bc89a8c9a33a0b3',
+        messagingSenderId: '645906943963',
+        projectId: 'resiliencia-85ff4',
+        storageBucket: 'resiliencia-85ff4.firebasestorage.app',
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       // Configuración para iOS
       return const FirebaseOptions(
-        apiKey: 'TU_API_KEY_IOS',
-        appId: 'TU_APP_ID_IOS',
-        messagingSenderId: 'TU_SENDER_ID',
-        projectId: 'TU_PROJECT_ID',
-        storageBucket: 'TU_PROJECT_ID.appspot.com',
-        iosBundleId: 'com.tuempresa.tuapp',
+        apiKey: 'AIzaSyDIMUQoKjvqcthyAuI3FBKyGte4JSDDkZE',
+        appId: '1:645906943963:ios:YOUR_IOS_APP_ID',
+        messagingSenderId: '645906943963',
+        projectId: 'resiliencia-85ff4',
+        storageBucket: 'resiliencia-85ff4.firebasestorage.app',
+        iosBundleId: 'com.example.resiliencia',
       );
     }
 
