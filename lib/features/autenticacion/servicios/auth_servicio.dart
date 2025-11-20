@@ -22,10 +22,10 @@ class AuthServicio {
   }) async {
     try {
       // Valida que sea email institucional UCSS
-      if (!email.endsWith('@ucss.pe')) {
+      if (!email.endsWith('@ucss.edu.pe')) {
         return ResultadoAuth(
           exito: false,
-          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.pe)',
+          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.edu.pe)',
         );
       }
 
@@ -73,14 +73,14 @@ class AuthServicio {
   }) async {
     try {
       // Valida que sea email institucional UCSS
-      if (!correo.endsWith('@ucss.pe')) {
+      if (!correo.endsWith('@ucss.edu.pe')) {
         return ResultadoAuth(
           exito: false,
-          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.pe)',
+          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.edu.pe)',
         );
       }
 
-      // Extrae el código del correo (parte antes de @ucss.pe)
+      // Extrae el código del correo (parte antes de @ucss.edu.pe)
       final codigo = correo.split('@')[0];
       final nombreCompleto = '$nombres $apellidos';
 
@@ -148,10 +148,10 @@ class AuthServicio {
   /// Envía email para restablecer contraseña
   Future<ResultadoAuth> restablecerPassword(String email) async {
     try {
-      if (!email.endsWith('@ucss.pe')) {
+      if (!email.endsWith('@ucss.edu.pe')) {
         return ResultadoAuth(
           exito: false,
-          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.pe)',
+          mensaje: 'Debes usar tu correo institucional UCSS (@ucss.edu.pe)',
         );
       }
 

@@ -35,11 +35,11 @@ class Validadores {
     }
 
     final ucssEmailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@ucss\.pe$',
+      r'^[a-zA-Z0-9._%+-]+@ucss\.edu\.pe$',
     );
 
     if (!ucssEmailRegex.hasMatch(valor)) {
-      return 'Usa tu correo institucional UCSS (ejemplo@ucss.pe)';
+      return 'Usa tu correo institucional UCSS (ejemplo@ucss.edu.pe)';
     }
 
     return null;
