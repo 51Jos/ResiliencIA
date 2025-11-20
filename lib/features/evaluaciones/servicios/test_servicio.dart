@@ -224,13 +224,17 @@ class TestServicio {
   /// Obtiene el historial completo de tests del usuario (desencriptado)
   Future<List<ResultadoTest>> obtenerHistorial(String usuarioId) async {
     try {
+      print('📊 Obteniendo historial de tests para usuario: $usuarioId');
+
       final query = await _firestore
           .collection('tests_ansiedad')
           .where('usuarioId', isEqualTo: usuarioId)
           .orderBy('fechaRealizacion', descending: true)
           .get();
 
-      return query.docs.map((doc) {
+      print('📊 Tests encontrados: ${query.docs.length}');
+
+      final resultados = query.docs.map((doc) {
         var datos = doc.data();
 
         // Desencripta si está encriptado
@@ -243,7 +247,11 @@ class TestServicio {
 
         return _construirResultadoTest(doc.id, datos);
       }).toList();
+
+      print('📊 Resultados procesados: ${resultados.length}');
+      return resultados;
     } catch (e) {
+      print('❌ Error al obtener historial: $e');
       return [];
     }
   }
