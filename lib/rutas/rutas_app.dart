@@ -14,6 +14,10 @@ class RutasApp {
   static const String login = '/login';
   static const String registro = '/registro';
   static const String home = '/home';
+
+  // Rutas de administración (protegidas)
+  static const String administracionEstudiantes = '/admin/estudiantes';
+  static const String administracionEstadisticas = '/admin/estadisticas';
   // static const String citas = '/citas';
   // static const String atenciones = '/atenciones';
 
