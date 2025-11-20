@@ -531,6 +531,11 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
             hintText: 'Confirma tu contraseña',
             prefixIcon: Icon(Icons.lock_outline, size: 20),
           ),
+          // Validación en tiempo real cuando se escribe
+          onChanged: (value) {
+            // Forzar revalidación del formulario
+            _formKey.currentState?.validate();
+          },
           validator: (valor) {
             if (valor == null || valor.isEmpty) {
               return 'Debes confirmar tu contraseña';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../features/splash/splash_vista.dart';
 import '../features/autenticacion/vistas/login_vista.dart';
 import '../features/autenticacion/vistas/registro_vista.dart';
+import '../features/autenticacion/vistas/crear_psicologo_vista.dart';
 import '../features/home/home_vista.dart';
 
 /// Configuración de rutas de la aplicación
@@ -18,8 +19,9 @@ class RutasApp {
   // Rutas de administración (protegidas)
   static const String administracionEstudiantes = '/admin/estudiantes';
   static const String administracionEstadisticas = '/admin/estadisticas';
-  // static const String citas = '/citas';
-  // static const String atenciones = '/atenciones';
+
+  // Ruta temporal para crear psicólogo (ELIMINAR EN PRODUCCIÓN)
+  static const String crearPsicologo = '/temp/crear-psicologo';
 
   /// Mapa de rutas
   static Map<String, WidgetBuilder> obtenerRutas() {
@@ -28,6 +30,8 @@ class RutasApp {
       login: (context) => const LoginVista(),
       registro: (context) => const RegistroVista(),
       home: (context) => const HomeVista(),
+      // TEMPORAL: Ruta para crear psicólogo de prueba
+      crearPsicologo: (context) => const CrearPsicologoVista(),
     };
   }
 
