@@ -130,14 +130,14 @@ class Validadores {
     return null;
   }
 
-  /// Valida contraseña (mínimo 8 caracteres)
+  /// Valida contraseña (mínimo 6 caracteres - estándar Firebase)
   static String? password(String? valor) {
     if (valor == null || valor.isEmpty) {
       return null;
     }
 
-    if (valor.length < 8) {
-      return 'La contraseña debe tener al menos 8 caracteres';
+    if (valor.length < 6) {
+      return 'La contraseña debe tener al menos 6 caracteres';
     }
 
     return null;
@@ -149,8 +149,8 @@ class Validadores {
       return null;
     }
 
-    if (valor.length < 8) {
-      return 'La contraseña debe tener al menos 8 caracteres';
+    if (valor.length < 6) {
+      return 'La contraseña debe tener al menos 6 caracteres';
     }
 
     // Valida que tenga al menos una letra mayúscula
