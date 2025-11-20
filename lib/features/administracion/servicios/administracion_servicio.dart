@@ -429,9 +429,10 @@ class AdministracionServicio {
       final rol = data['rol'] as String?;
       final email = data['email'] as String?;
 
-      // Debe ser psicólogo/admin Y tener correo @ucss.edu.pe
+      // Debe ser psicólogo/admin Y tener correo UCSS (@ucss.pe o @ucss.edu.pe)
       return (rol == 'psicologo' || rol == 'admin') &&
-          (email != null && email.endsWith('@ucss.edu.pe'));
+          (email != null &&
+           (email.endsWith('@ucss.pe') || email.endsWith('@ucss.edu.pe')));
     } catch (e) {
       return false;
     }

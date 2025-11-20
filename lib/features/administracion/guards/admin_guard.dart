@@ -3,7 +3,7 @@ import '../servicios/administracion_servicio.dart';
 import '../../../compartidos/tema/colores_app.dart';
 
 /// Guard para verificar que el usuario tiene permisos de administrador
-/// Requiere: rol 'psicologo' o 'admin' Y email @ucss.edu.pe
+/// Requiere: rol 'psicologo' o 'admin' Y email UCSS (@ucss.pe o @ucss.edu.pe)
 class AdminGuard extends StatefulWidget {
   final String usuarioId;
   final Widget child;
@@ -114,7 +114,7 @@ class _VistaNoAutorizada extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Esta área es exclusiva para psicólogos con correo @ucss.edu.pe',
+                'Esta área es exclusiva para psicólogos con correo institucional UCSS',
                 style: TextStyle(
                   fontSize: 14,
                   color: ColoresApp.textoClaro,
