@@ -16,14 +16,11 @@ class NotificacionesServicio {
     required int puntajeTest,
   }) async {
     try {
-      print('🚨 Creando alerta de ansiedad grave para $estudianteNombre');
-
       // Obtener todos los psicólogos activos
       final psicologos = await _obtenerPsicologosActivos();
 
       if (psicologos.isEmpty) {
-        print('⚠️ No hay psicólogos activos en el sistema');
-        return '';
+       return '';
       }
 
       // Determinar prioridad según nivel
@@ -40,7 +37,7 @@ class NotificacionesServicio {
           prioridad: prioridad,
           titulo: '⚠️ Nivel de Ansiedad ${nivelAnsiedad == NivelAnsiedad.severa ? "Severo" : "Grave"}',
           mensaje:
-              'El estudiante $estudianteNombre ha completado un test con nivel de ansiedad ${nivelAnsiedad.nombre} (${puntajeTest}/63 pts). Se requiere atención profesional inmediata.',
+              'El estudiante $estudianteNombre ha completado un test con nivel de ansiedad ${nivelAnsiedad.nombre} ($puntajeTest/63 pts). Se requiere atención profesional inmediata.',
           destinatarioId: psicologo['uid'],
           estudianteId: estudianteId,
           estudianteNombre: estudianteNombre,
@@ -54,13 +51,10 @@ class NotificacionesServicio {
             .add(notificacion.toFirestore());
 
         ultimoId = docRef.id;
-        print('✅ Notificación creada para psicólogo: ${psicologo['nombreCompleto']}');
-        print('📱 Notificación visible en la app mediante Streams');
       }
 
       return ultimoId;
     } catch (e) {
-      print('❌ Error al crear alerta de ansiedad: $e');
       rethrow;
     }
   }
@@ -90,7 +84,6 @@ class NotificacionesServicio {
 
       return notificaciones;
     } catch (e) {
-      print('❌ Error al obtener notificaciones: $e');
       return [];
     }
   }
@@ -103,7 +96,6 @@ class NotificacionesServicio {
         'fechaLeida': Timestamp.now(),
       });
     } catch (e) {
-      print('❌ Error al marcar notificación como leída: $e');
       rethrow;
     }
   }
@@ -128,7 +120,6 @@ class NotificacionesServicio {
 
       await batch.commit();
     } catch (e) {
-      print('❌ Error al marcar todas las notificaciones como leídas: $e');
       rethrow;
     }
   }
@@ -144,7 +135,6 @@ class NotificacionesServicio {
 
       return snapshot.docs.length;
     } catch (e) {
-      print('❌ Error al contar notificaciones no leídas: $e');
       return 0;
     }
   }
@@ -154,7 +144,6 @@ class NotificacionesServicio {
     try {
       await _firestore.collection('notificaciones').doc(notificacionId).delete();
     } catch (e) {
-      print('❌ Error al eliminar notificación: $e');
       rethrow;
     }
   }
@@ -178,7 +167,6 @@ class NotificacionesServicio {
 
       return psicologos;
     } catch (e) {
-      print('❌ Error al obtener psicólogos activos: $e');
       return [];
     }
   }
@@ -215,8 +203,7 @@ class NotificacionesServicio {
     required String estudianteEmail,
   }) async {
     try {
-      print('📅 Creando recordatorio de test para $estudianteNombre');
-
+      
       // Crear notificación en Firestore (para historial)
       final notificacion = Notificacion(
         id: '',
@@ -233,12 +220,9 @@ class NotificacionesServicio {
           .collection('notificaciones')
           .add(notificacion.toFirestore());
 
-      print('✅ Notificación de recordatorio creada para $estudianteNombre');
-      print('📱 Notificación visible en la app mediante Streams');
-
+      
       return docRef.id;
     } catch (e) {
-      print('❌ Error al crear recordatorio de test: $e');
       rethrow;
     }
   }

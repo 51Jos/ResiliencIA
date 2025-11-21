@@ -4,7 +4,6 @@ import '../../../compartidos/tema/colores_app.dart';
 import '../../../compartidos/componentes/campos/campo_textarea.dart';
 import '../../../compartidos/componentes/campos/campo_fecha.dart';
 import '../../../compartidos/componentes/campos/campo_hora.dart';
-import '../../../compartidos/componentes/botones/boton_primario.dart';
 import '../controladores/administracion_controlador.dart';
 import '../modelos/estudiante_info.dart';
 import '../componentes/grafica_evolucion.dart';
@@ -478,7 +477,6 @@ class _HistorialTests extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          print('❌ Error al cargar historial: ${snapshot.error}');
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

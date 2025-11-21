@@ -4,7 +4,6 @@ import '../modelos/estadisticas_globales.dart';
 import '../../evaluaciones/modelos/pregunta_beck.dart';
 
 /// Gráfica simple de evolución del nivel de ansiedad
-/// TODO: Considerar usar fl_chart para una implementación más robusta
 class GraficaEvolucion extends StatelessWidget {
   final List<PuntoEvolucion> puntos;
   final double altura;

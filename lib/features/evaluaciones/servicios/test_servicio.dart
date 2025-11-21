@@ -142,12 +142,16 @@ class TestServicio {
         .collection('tests_ansiedad')
         .add(datosEncriptados);
 
+    print('✅ Test guardado con ID: ${docRef.id}');
+
+    // ⭐ ACTUALIZAR PERFIL DEL USUARIO con datos del último test
+    await _actualizarPerfilUsuario(resultado);
+
     // RF23: Si el nivel de ansiedad es grave, crear alerta para psicólogo
     if (resultado.nivelAnsiedad == NivelAnsiedad.moderadaGrave ||
         resultado.nivelAnsiedad == NivelAnsiedad.severa) {
 
-      print('🚨 Nivel de ansiedad grave detectado, creando notificación...');
-
+      
       try {
         // Obtener nombre del estudiante desde Firestore
         final usuarioDoc = await _firestore
@@ -165,15 +169,48 @@ class TestServicio {
             puntajeTest: resultado.puntajeTotal,
           );
 
-          print('✅ Notificación de ansiedad grave creada exitosamente');
-        }
+         }
       } catch (e) {
-        print('⚠️ Error al crear notificación de ansiedad: $e');
-        // No lanzar error para no interrumpir el guardado del test
+       // No lanzar error para no interrumpir el guardado del test
       }
     }
 
     return docRef.id;
+  }
+
+  /// Actualiza el perfil del usuario con datos del último test
+  /// Esto permite mostrar el nivel de ansiedad en la lista de estudiantes
+  /// sin hacer queries adicionales por cada estudiante
+  Future<void> _actualizarPerfilUsuario(ResultadoTest resultado) async {
+    try {
+      print('📊 Actualizando perfil de usuario...');
+
+      // Contar total de tests del estudiante
+      final testsSnapshot = await _firestore
+          .collection('tests_ansiedad')
+          .where('usuarioId', isEqualTo: resultado.usuarioId)
+          .get();
+
+      final totalTests = testsSnapshot.docs.length;
+
+      // Determinar si requiere atención (moderadaGrave o severa)
+      final requiereAtencion = resultado.nivelAnsiedad == NivelAnsiedad.moderadaGrave ||
+                               resultado.nivelAnsiedad == NivelAnsiedad.severa;
+
+      // Actualizar documento del usuario con datos pre-calculados
+      await _firestore.collection('usuarios').doc(resultado.usuarioId).update({
+        'ultimoNivelAnsiedad': resultado.nivelAnsiedad.name,
+        'puntajeUltimoTest': resultado.puntajeTotal,
+        'fechaUltimoTest': Timestamp.fromDate(resultado.fechaRealizacion),
+        'totalTests': totalTests,
+        'requiereAtencion': requiereAtencion,
+      });
+
+      print('✅ Perfil actualizado: nivel=${resultado.nivelAnsiedad.name}, puntaje=${resultado.puntajeTotal}, total=$totalTests');
+    } catch (e) {
+      print('⚠️ Error al actualizar perfil: $e');
+      // No lanzar error, es una operación secundaria
+    }
   }
 
   /// Actualiza un resultado existente (para marcar derivación, etc.)
@@ -257,15 +294,11 @@ class TestServicio {
   /// Obtiene el historial completo de tests del usuario (desencriptado)
   Future<List<ResultadoTest>> obtenerHistorial(String usuarioId) async {
     try {
-      print('📊 Obteniendo historial de tests para usuario: $usuarioId');
-
       final query = await _firestore
           .collection('tests_ansiedad')
           .where('usuarioId', isEqualTo: usuarioId)
           .orderBy('fechaRealizacion', descending: true)
           .get();
-
-      print('📊 Tests encontrados: ${query.docs.length}');
 
       final resultados = query.docs.map((doc) {
         var datos = doc.data();
@@ -281,10 +314,8 @@ class TestServicio {
         return _construirResultadoTest(doc.id, datos);
       }).toList();
 
-      print('📊 Resultados procesados: ${resultados.length}');
       return resultados;
     } catch (e) {
-      print('❌ Error al obtener historial: $e');
       return [];
     }
   }

@@ -100,29 +100,21 @@ class _LoginFormularioState extends State<LoginFormulario> {
 
   Future<void> _verificarYRedirigir(String usuarioId) async {
     try {
-      print('🔐 Login exitoso, verificando permisos para usuario: $usuarioId');
-
+      
       // Obtener datos del usuario PRIMERO para debugging
       final authControlador = Provider.of<AuthControlador>(context, listen: false);
       final datosUsuario = await authControlador.obtenerDatosUsuario();
 
-      print('📋 Datos del usuario en Firestore:');
-      print('   - Email: ${datosUsuario?['email']}');
-      print('   - Rol: ${datosUsuario?['rol']}');
-      print('   - Nombres: ${datosUsuario?['nombres']}');
-      print('   - Apellidos: ${datosUsuario?['apellidos']}');
-
+      
       // Primero verificar si es administrador
       final administracionServicio = AdministracionServicio();
       final esAdmin = await administracionServicio.esAdministrador(usuarioId);
 
-      print('🔍 Resultado de esAdministrador(): $esAdmin');
-
+     
       if (mounted) {
         if (esAdmin) {
           // ES ADMINISTRADOR (psicólogo) -> Panel de administración
-          print('👨‍⚕️ Usuario es administrador, redirigiendo al panel de administración');
-
+          
           final nombres = datosUsuario?['nombres'] ?? '';
           final apellidos = datosUsuario?['apellidos'] ?? '';
           final nombreCompleto = '$nombres $apellidos'.trim();
@@ -151,16 +143,13 @@ class _LoginFormularioState extends State<LoginFormulario> {
 
         if (rol == 'estudiante') {
           // ES ESTUDIANTE -> Verificar si necesita hacer el test
-          print('👨‍🎓 Usuario es estudiante, verificando si necesita test');
           final testServicio = TestServicio();
           final necesitaTest = await testServicio.necesitaRealizarTest(usuarioId);
 
-          print('🎯 Necesita test: $necesitaTest');
-
+          
           if (!mounted) return;
 
           if (necesitaTest) {
-            print('➡️ Redirigiendo al test de ansiedad');
             // Redirige al test de ansiedad
             Navigator.pushReplacement(
               context,
@@ -169,18 +158,15 @@ class _LoginFormularioState extends State<LoginFormulario> {
               ),
             );
           } else {
-            print('➡️ Redirigiendo al home (estudiante sin test pendiente)');
             // Redirige al home
             Navigator.pushReplacementNamed(context, '/home');
           }
         } else {
           // Rol desconocido o no autorizado
-          print('⚠️ Rol desconocido: $rol - Redirigiendo al home');
           Navigator.pushReplacementNamed(context, '/home');
         }
       }
     } catch (e) {
-      print('❌ Error al verificar permisos: $e');
       // En caso de error, redirige al home
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');

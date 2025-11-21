@@ -11,14 +11,14 @@ class RecordatoriosServicio {
   /// Verifica todos los estudiantes y envía recordatorios según días restantes
   Future<void> verificarYCrearRecordatorios() async {
     try {
-      print('🔔 Verificando estudiantes que necesitan recordatorios...');
-
+      
       // Obtener todos los estudiantes
       final estudiantesSnapshot = await _firestore
           .collection('usuarios')
           .where('rol', isEqualTo: 'estudiante')
           .get();
 
+      // ignore: unused_local_variable
       int recordatoriosCreados = 0;
 
       for (var estudianteDoc in estudiantesSnapshot.docs) {
@@ -47,8 +47,7 @@ class RecordatoriosServicio {
         final diasDesdeUltimoTest = DateTime.now().difference(fechaUltimoTest).inDays;
         final diasRestantes = 30 - diasDesdeUltimoTest;
 
-        print('📊 Estudiante $nombreCompleto: $diasDesdeUltimoTest días desde último test, $diasRestantes días restantes');
-
+        
         // Determinar si necesita recordatorio
         String? tipoRecordatorio;
         if (diasRestantes <= 0) {
@@ -81,10 +80,9 @@ class RecordatoriosServicio {
         }
       }
 
-      print('✅ Proceso completado: $recordatoriosCreados recordatorios creados');
-    } catch (e) {
-      print('❌ Error al verificar recordatorios: $e');
-    }
+      // ignore: empty_catches
+      } catch (e) {
+      }
   }
 
   /// Verifica si ya existe un recordatorio reciente del mismo tipo
@@ -143,7 +141,6 @@ class RecordatoriosServicio {
 
       return notificaciones;
     } catch (e) {
-      print('❌ Error al obtener recordatorios: $e');
       return [];
     }
   }
@@ -156,7 +153,7 @@ class RecordatoriosServicio {
         'fechaLeida': Timestamp.now(),
       });
     } catch (e) {
-      print('❌ Error al marcar recordatorio como leído: $e');
+      // ignore: avoid_print
     }
   }
 
@@ -204,9 +201,8 @@ class RecordatoriosServicio {
 
       await batch.commit();
 
-      print('✅ ${recordatoriosViejos.docs.length} recordatorios antiguos eliminados');
-    } catch (e) {
-      print('❌ Error al limpiar recordatorios antiguos: $e');
+      } catch (e) {
+      // ignore: avoid_print
     }
   }
 }
