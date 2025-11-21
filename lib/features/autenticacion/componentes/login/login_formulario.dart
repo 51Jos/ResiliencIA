@@ -8,7 +8,7 @@ import '../../../../compartidos/tema/colores_app.dart';
 import '../../../evaluaciones/servicios/test_servicio.dart';
 import '../../../evaluaciones/vistas/test_ansiedad_vista.dart';
 import '../../../administracion/servicios/administracion_servicio.dart';
-import '../../../administracion/vistas/lista_estudiantes_vista.dart';
+import '../../../administracion/vistas/panel_admin_vista.dart';
 import '../../../administracion/guards/admin_guard.dart';
 
 /// Formulario de inicio de sesión
@@ -123,14 +123,16 @@ class _LoginFormularioState extends State<LoginFormulario> {
           if (!mounted) return;
 
           // Redirige al panel de administración con guard
+          final rol = datosUsuario?['rol'] as String?;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => AdminGuard(
                 usuarioId: usuarioId,
-                child: ListaEstudiantesVista(
+                child: PanelAdminVista(
                   psicologoId: usuarioId,
                   psicologoNombre: nombreFinal,
+                  psicologoRol: rol,
                 ),
               ),
             ),
