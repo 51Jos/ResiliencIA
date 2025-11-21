@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modelos/pregunta_beck.dart';
 import '../modelos/resultado_test.dart';
 import 'encriptacion_servicio.dart';
+import '../../notificaciones/servicios/notificaciones_servicio.dart';
 
 /// Servicio para gestionar tests de ansiedad y sus resultados
 class TestServicio {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final NotificacionesServicio _notificacionesServicio = NotificacionesServicio();
 
   /// Verifica si el usuario necesita realizar el test
   /// Retorna true si:
@@ -126,7 +128,7 @@ class TestServicio {
 
   /// Guarda un nuevo resultado de test (encriptado)
   Future<String> guardarResultado(ResultadoTest resultado) async {
-    
+
     // Convierte a Firestore
     final datos = resultado.toFirestore();
 
@@ -139,6 +141,37 @@ class TestServicio {
     final docRef = await _firestore
         .collection('tests_ansiedad')
         .add(datosEncriptados);
+
+    // RF23: Si el nivel de ansiedad es grave, crear alerta para psicólogo
+    if (resultado.nivelAnsiedad == NivelAnsiedad.moderadaGrave ||
+        resultado.nivelAnsiedad == NivelAnsiedad.severa) {
+
+      print('🚨 Nivel de ansiedad grave detectado, creando notificación...');
+
+      try {
+        // Obtener nombre del estudiante desde Firestore
+        final usuarioDoc = await _firestore
+            .collection('usuarios')
+            .doc(resultado.usuarioId)
+            .get();
+
+        if (usuarioDoc.exists) {
+          final nombreCompleto = usuarioDoc.data()?['nombreCompleto'] as String? ?? 'Estudiante';
+
+          await _notificacionesServicio.crearAlertaAnsiedadGrave(
+            estudianteId: resultado.usuarioId,
+            estudianteNombre: nombreCompleto,
+            nivelAnsiedad: resultado.nivelAnsiedad,
+            puntajeTest: resultado.puntajeTotal,
+          );
+
+          print('✅ Notificación de ansiedad grave creada exitosamente');
+        }
+      } catch (e) {
+        print('⚠️ Error al crear notificación de ansiedad: $e');
+        // No lanzar error para no interrumpir el guardado del test
+      }
+    }
 
     return docRef.id;
   }

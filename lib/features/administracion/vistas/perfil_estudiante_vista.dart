@@ -81,6 +81,8 @@ class _PerfilEstudianteVistaState extends State<PerfilEstudianteVista> {
                 _HistorialTests(
                   estudianteId: widget.estudiante.uid,
                   testServicio: _testServicio,
+                  psicologoId: widget.psicologoId,
+                  psicologoRol: 'psicologo', // Asumimos que es psicólogo ya que está en perfil de estudiante
                 ),
                 const SizedBox(height: 16),
 
@@ -440,24 +442,91 @@ class _InfoItem extends StatelessWidget {
 class _HistorialTests extends StatelessWidget {
   final String estudianteId;
   final TestServicio testServicio;
+  final String psicologoId;
+  final String psicologoRol;
 
   const _HistorialTests({
     required this.estudianteId,
     required this.testServicio,
+    required this.psicologoId,
+    required this.psicologoRol,
   });
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: testServicio.obtenerHistorial(estudianteId),
+      future: testServicio.obtenerHistorialEstudiante(
+        estudianteId: estudianteId,
+        usuarioSolicitante: psicologoId,
+        rolUsuario: psicologoRol,
+      ),
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ColoresApp.fondoBlanco,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ColoresApp.bordeDivisor),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(ColoresApp.primario),
+              ),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          print('❌ Error al cargar historial: ${snapshot.error}');
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ColoresApp.fondoBlanco,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ColoresApp.bordeDivisor),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.error_outline, color: ColoresApp.error, size: 32),
+                const SizedBox(height: 8),
+                Text(
+                  'Error al cargar historial: ${snapshot.error}',
+                  style: const TextStyle(color: ColoresApp.error, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
         }
 
         final tests = snapshot.data!;
         if (tests.isEmpty) {
-          return const SizedBox.shrink();
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: ColoresApp.fondoBlanco,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ColoresApp.bordeDivisor),
+            ),
+            child: const Column(
+              children: [
+                Icon(Icons.assignment_outlined, color: ColoresApp.textoMedio, size: 32),
+                SizedBox(height: 8),
+                Text(
+                  'No hay evaluaciones registradas',
+                  style: TextStyle(
+                    color: ColoresApp.textoMedio,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         return Container(

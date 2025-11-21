@@ -9,11 +9,13 @@ import '../../evaluaciones/modelos/pregunta_beck.dart';
 class EstadisticasVista extends StatefulWidget {
   final String psicologoId;
   final String psicologoNombre;
+  final bool ocultarAppBar;
 
   const EstadisticasVista({
     super.key,
     required this.psicologoId,
     required this.psicologoNombre,
+    this.ocultarAppBar = false,
   });
 
   @override
@@ -33,7 +35,7 @@ class _EstadisticasVistaState extends State<EstadisticasVista> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColoresApp.fondoPrincipal,
-      appBar: AppBar(
+      appBar: widget.ocultarAppBar ? null : AppBar(
         title: const Text('Estadísticas Globales'),
         backgroundColor: ColoresApp.primario,
         foregroundColor: Colors.white,

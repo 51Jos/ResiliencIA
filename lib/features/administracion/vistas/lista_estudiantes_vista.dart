@@ -12,11 +12,13 @@ import 'estadisticas_vista.dart';
 class ListaEstudiantesVista extends StatefulWidget {
   final String psicologoId;
   final String psicologoNombre;
+  final bool ocultarAppBar;
 
   const ListaEstudiantesVista({
     super.key,
     required this.psicologoId,
     required this.psicologoNombre,
+    this.ocultarAppBar = false,
   });
 
   @override
@@ -47,7 +49,7 @@ class _ListaEstudiantesVistaState extends State<ListaEstudiantesVista> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColoresApp.fondoPrincipal,
-      appBar: AppBar(
+      appBar: widget.ocultarAppBar ? null : AppBar(
         title: const Text('Gestión de Estudiantes'),
         backgroundColor: ColoresApp.primario,
         foregroundColor: Colors.white,

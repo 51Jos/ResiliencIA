@@ -16,6 +16,7 @@ class RutasApp {
   static const String home = '/home';
 
   // Rutas de administración (protegidas)
+  static const String administracionPanel = '/admin/panel';
   static const String administracionEstudiantes = '/admin/estudiantes';
   static const String administracionEstadisticas = '/admin/estadisticas';
 

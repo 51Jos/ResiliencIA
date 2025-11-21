@@ -10,11 +10,69 @@ class AdministracionServicio {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TestServicio _testServicio = TestServicio();
 
+  // Cache para estadísticas globales
+  EstadisticasGlobales? _estadisticasCache;
+  DateTime? _estadisticasCacheTimestamp;
+
+  // Cache para lista de estudiantes
+  List<EstudianteInfo>? _estudiantesCache;
+  DateTime? _estudiantesCacheTimestamp;
+
+  static const Duration _cacheDuration = Duration(minutes: 5); // Cache por 5 minutos
+
+  /// Verifica si el cache de estadísticas es válido
+  bool _esCacheEstadisticasValido() {
+    if (_estadisticasCache == null || _estadisticasCacheTimestamp == null) {
+      return false;
+    }
+    final diferencia = DateTime.now().difference(_estadisticasCacheTimestamp!);
+    return diferencia < _cacheDuration;
+  }
+
+  /// Verifica si el cache de estudiantes es válido
+  bool _esCacheEstudiantesValido() {
+    if (_estudiantesCache == null || _estudiantesCacheTimestamp == null) {
+      return false;
+    }
+    final diferencia = DateTime.now().difference(_estudiantesCacheTimestamp!);
+    return diferencia < _cacheDuration;
+  }
+
+  /// Invalida el cache de estadísticas
+  void invalidarCacheEstadisticas() {
+    _estadisticasCache = null;
+    _estadisticasCacheTimestamp = null;
+    print('🗑️ Cache de estadísticas invalidado');
+  }
+
+  /// Invalida el cache de estudiantes
+  void invalidarCacheEstudiantes() {
+    _estudiantesCache = null;
+    _estudiantesCacheTimestamp = null;
+    print('🗑️ Cache de estudiantes invalidado');
+  }
+
+  /// Invalida todos los caches
+  void invalidarTodosLosCaches() {
+    invalidarCacheEstadisticas();
+    invalidarCacheEstudiantes();
+  }
+
   /// Obtiene la lista de todos los estudiantes
+  /// Usa caché de 5 minutos para mejorar rendimiento
   Future<List<EstudianteInfo>> obtenerEstudiantes({
     FiltrosAdministracion? filtros,
+    bool forzarRecarga = false,
   }) async {
     try {
+      // Si no hay filtros y el cache es válido, devolver cache
+      if (!forzarRecarga && filtros == null && _esCacheEstudiantesValido()) {
+        print('⚡ Usando lista de estudiantes desde cache');
+        return _estudiantesCache!;
+      }
+
+      print('📋 Obteniendo lista de estudiantes desde Firestore...');
+
       Query<Map<String, dynamic>> query = _firestore
           .collection('usuarios')
           .where('rol', isEqualTo: 'estudiante');
@@ -39,9 +97,26 @@ class AdministracionServicio {
       }
 
       final snapshot = await query.get();
-      var estudiantes = snapshot.docs
-          .map((doc) => EstudianteInfo.fromFirestore(doc))
-          .toList();
+      print('📋 Estudiantes encontrados: ${snapshot.docs.length}');
+
+      // Cargar estudiantes y calcular totalTests para cada uno
+      var estudiantes = <EstudianteInfo>[];
+      for (var doc in snapshot.docs) {
+        var estudiante = EstudianteInfo.fromFirestore(doc);
+
+        // Contar los tests del estudiante desde la colección tests_ansiedad
+        final testsSnapshot = await _firestore
+            .collection('tests_ansiedad')
+            .where('usuarioId', isEqualTo: estudiante.uid)
+            .get();
+
+        final totalTests = testsSnapshot.docs.length;
+        print('📊 Estudiante ${estudiante.nombreCompleto}: $totalTests tests');
+
+        // Actualizar el totalTests con el valor real
+        estudiante = estudiante.copyWith(totalTests: totalTests);
+        estudiantes.add(estudiante);
+      }
 
       // Aplicar filtro de búsqueda (cliente)
       if (filtros?.busqueda != null && filtros!.busqueda!.isNotEmpty) {
@@ -71,6 +146,13 @@ class AdministracionServicio {
       // Aplicar ordenamiento
       if (filtros?.orden != null) {
         estudiantes = _ordenarEstudiantes(estudiantes, filtros!.orden);
+      }
+
+      // Guardar en cache solo si no hay filtros
+      if (filtros == null) {
+        _estudiantesCache = estudiantes;
+        _estudiantesCacheTimestamp = DateTime.now();
+        print('💾 Estudiantes guardados en cache (${estudiantes.length} estudiantes, válido por ${_cacheDuration.inMinutes} minutos)');
       }
 
       return estudiantes;
@@ -124,13 +206,25 @@ class AdministracionServicio {
   }
 
   /// Obtiene estadísticas globales del sistema
+  /// Calcula estadísticas directamente desde la colección de tests
+  /// Usa caché de 5 minutos para mejorar rendimiento
   Future<EstadisticasGlobales> obtenerEstadisticasGlobales({
     DateTime? fechaDesde,
     DateTime? fechaHasta,
+    bool forzarRecarga = false,
   }) async {
     try {
+      // Si no se especifican fechas y el cache es válido, devolver cache
+      if (!forzarRecarga && fechaDesde == null && fechaHasta == null && _esCacheEstadisticasValido()) {
+        print('⚡ Usando estadísticas desde cache');
+        return _estadisticasCache!;
+      }
+
+      print('📊 Calculando estadísticas globales...');
+
       // Obtener todos los estudiantes
       final estudiantes = await obtenerEstudiantes();
+      print('📋 Total estudiantes: ${estudiantes.length}');
 
       // Obtener todos los tests
       Query<Map<String, dynamic>> testsQuery = _firestore
@@ -151,38 +245,69 @@ class AdministracionServicio {
       }
 
       final testsSnapshot = await testsQuery.get();
+      print('📊 Total tests en colección: ${testsSnapshot.docs.length}');
 
-      // Calcular distribución de niveles
+      // Agrupar tests por estudiante para obtener solo el último de cada uno
+      final ultimosTestsPorEstudiante = <String, Map<String, dynamic>>{};
+
+      for (var testDoc in testsSnapshot.docs) {
+        final testData = testDoc.data();
+        final usuarioId = testData['usuarioId'] as String;
+        final fechaRealizacion = (testData['fechaRealizacion'] as Timestamp).toDate();
+
+        if (!ultimosTestsPorEstudiante.containsKey(usuarioId) ||
+            fechaRealizacion.isAfter(
+              (ultimosTestsPorEstudiante[usuarioId]!['fechaRealizacion'] as Timestamp).toDate()
+            )) {
+          ultimosTestsPorEstudiante[usuarioId] = testData;
+        }
+      }
+
+      print('👥 Estudiantes con tests: ${ultimosTestsPorEstudiante.length}');
+
+      // Calcular estadísticas basadas en los últimos tests de cada estudiante
       final distribucionNiveles = <NivelAnsiedad, int>{};
       int estudiantesConAnsiedad = 0;
       int estudiantesRequierenAtencion = 0;
       double sumaPuntajes = 0;
       DateTime? ultimaFecha;
+      int contadorPuntajes = 0;
 
-      for (var estudiante in estudiantes) {
-        if (estudiante.ultimoNivelAnsiedad != null) {
-          final nivel = estudiante.ultimoNivelAnsiedad!;
-          distribucionNiveles[nivel] = (distribucionNiveles[nivel] ?? 0) + 1;
+      for (var testData in ultimosTestsPorEstudiante.values) {
+        // Obtener nivel de ansiedad
+        final nivelString = testData['nivelAnsiedad'] as String;
+        final nivel = NivelAnsiedad.values.firstWhere(
+          (e) => e.name == nivelString,
+          orElse: () => NivelAnsiedad.minima,
+        );
 
-          if (nivel != NivelAnsiedad.minima) {
-            estudiantesConAnsiedad++;
-          }
+        // Contar distribución de niveles
+        distribucionNiveles[nivel] = (distribucionNiveles[nivel] ?? 0) + 1;
 
-          if (estudiante.requiereAtencion) {
-            estudiantesRequierenAtencion++;
-          }
+        // Contar estudiantes con ansiedad
+        if (nivel != NivelAnsiedad.minima) {
+          estudiantesConAnsiedad++;
+        }
 
-          if (estudiante.puntajeUltimoTest != null) {
-            sumaPuntajes += estudiante.puntajeUltimoTest!;
-          }
+        // Contar estudiantes que requieren atención (moderada-grave o severa)
+        if (nivel == NivelAnsiedad.moderadaGrave || nivel == NivelAnsiedad.severa) {
+          estudiantesRequierenAtencion++;
+        }
 
-          if (ultimaFecha == null ||
-              (estudiante.fechaUltimoTest != null &&
-                  estudiante.fechaUltimoTest!.isAfter(ultimaFecha))) {
-            ultimaFecha = estudiante.fechaUltimoTest;
-          }
+        // Sumar puntajes
+        final puntaje = testData['puntajeTotal'] as int;
+        sumaPuntajes += puntaje;
+        contadorPuntajes++;
+
+        // Actualizar última fecha
+        final fechaTest = (testData['fechaRealizacion'] as Timestamp).toDate();
+        if (ultimaFecha == null || fechaTest.isAfter(ultimaFecha)) {
+          ultimaFecha = fechaTest;
         }
       }
+
+      print('📈 Estudiantes con ansiedad: $estudiantesConAnsiedad');
+      print('⚠️ Estudiantes que requieren atención: $estudiantesRequierenAtencion');
 
       // Distribución por carrera
       final distribucionPorCarrera = <String, int>{};
@@ -202,11 +327,15 @@ class AdministracionServicio {
         }
       }
 
-      final promedioGeneral = estudiantes.isEmpty
+      final promedioGeneral = contadorPuntajes == 0
           ? 0.0
-          : sumaPuntajes / estudiantes.where((e) => e.puntajeUltimoTest != null).length;
+          : sumaPuntajes / contadorPuntajes;
 
-      return EstadisticasGlobales(
+      print('✅ Estadísticas calculadas exitosamente');
+      print('   - Distribución niveles: $distribucionNiveles');
+      print('   - Promedio general: ${promedioGeneral.toStringAsFixed(1)}');
+
+      final estadisticas = EstadisticasGlobales(
         totalEstudiantes: estudiantes.length,
         totalTests: testsSnapshot.docs.length,
         estudiantesConAnsiedad: estudiantesConAnsiedad,
@@ -217,7 +346,17 @@ class AdministracionServicio {
         promedioGeneral: promedioGeneral,
         fechaUltimoTest: ultimaFecha,
       );
+
+      // Guardar en cache solo si no hay filtros de fecha
+      if (fechaDesde == null && fechaHasta == null) {
+        _estadisticasCache = estadisticas;
+        _estadisticasCacheTimestamp = DateTime.now();
+        print('💾 Estadísticas guardadas en cache (válido por ${_cacheDuration.inMinutes} minutos)');
+      }
+
+      return estadisticas;
     } catch (e) {
+      print('❌ Error al obtener estadísticas globales: $e');
       rethrow;
     }
   }
@@ -286,12 +425,16 @@ class AdministracionServicio {
       final snapshot = await _firestore
           .collection('observaciones')
           .where('estudianteId', isEqualTo: estudianteId)
-          .orderBy('fechaCreacion', descending: true)
           .get();
 
-      return snapshot.docs
+      // Ordenar en memoria para evitar necesidad de index compuesto
+      final observaciones = snapshot.docs
           .map((doc) => Observacion.fromFirestore(doc))
           .toList();
+
+      observaciones.sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
+
+      return observaciones;
     } catch (e) {
       rethrow;
     }
@@ -342,12 +485,16 @@ class AdministracionServicio {
       final snapshot = await _firestore
           .collection('citas')
           .where('estudianteId', isEqualTo: estudianteId)
-          .orderBy('fechaCita', descending: true)
           .get();
 
-      return snapshot.docs
+      // Ordenar en memoria para evitar necesidad de index compuesto
+      final citas = snapshot.docs
           .map((doc) => CitaProgramada.fromFirestore(doc))
           .toList();
+
+      citas.sort((a, b) => b.fechaCita.compareTo(a.fechaCita));
+
+      return citas;
     } catch (e) {
       rethrow;
     }

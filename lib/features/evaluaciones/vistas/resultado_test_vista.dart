@@ -98,6 +98,36 @@ class _ResultadoTestVistaState extends State<ResultadoTestVista> {
     }
   }
 
+  String _getIntensidadTexto(int puntaje) {
+    switch (puntaje) {
+      case 0:
+        return 'En absoluto';
+      case 1:
+        return 'Levemente';
+      case 2:
+        return 'Moderadamente';
+      case 3:
+        return 'Severamente';
+      default:
+        return '';
+    }
+  }
+
+  Color _getColorIntensidad(int puntaje) {
+    switch (puntaje) {
+      case 0:
+        return ColoresApp.exito;
+      case 1:
+        return Colors.blue;
+      case 2:
+        return ColoresApp.advertencia;
+      case 3:
+        return ColoresApp.error;
+      default:
+        return ColoresApp.textoMedio;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_cargando) {
@@ -265,6 +295,122 @@ class _ResultadoTestVistaState extends State<ResultadoTestVista> {
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Detalle de respuestas por pregunta
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: ColoresApp.fondoBlanco,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: ColoresApp.bordeDivisor,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Detalle por Pregunta',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: ColoresApp.textoOscuro,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Puntaje obtenido en cada síntoma evaluado:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: ColoresApp.textoMedio,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ...InventarioBeck.preguntas.map((pregunta) {
+                          final puntaje = widget.resultado.respuestas[pregunta.id] ?? 0;
+                          final intensidad = _getIntensidadTexto(puntaje);
+                          final colorIntensidad = _getColorIntensidad(puntaje);
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: ColoresApp.fondoTarjeta,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                // Número de pregunta
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: ColoresApp.primario.withValues(alpha: 0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${pregunta.id}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: ColoresApp.primario,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Texto de la pregunta
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        pregunta.texto,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: ColoresApp.textoOscuro,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        intensidad,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: colorIntensidad,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Puntaje
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorIntensidad.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '$puntaje/3',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorIntensidad,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),

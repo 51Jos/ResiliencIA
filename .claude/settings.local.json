@@ -25,7 +25,13 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "Bash(flutter doctor:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(clip:*)",
+      "Bash(dir:*)",
+      "Bash(flutter build:*)",
+      "Bash(npm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(firebase login:*)"
     ],
     "deny": [],
     "ask": []
