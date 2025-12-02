@@ -78,13 +78,7 @@ class _EstadisticasVistaState extends State<EstadisticasVista> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.3,
+                  _GridResponsivo(
                     children: [
                       TarjetaEstadistica(
                         titulo: 'Total de estudiantes',
@@ -349,6 +343,35 @@ class _DistribucionLista extends StatelessWidget {
           );
         }).toList(),
       ),
+    );
+  }
+}
+
+/// Grid responsivo que ajusta el número de columnas según el ancho de pantalla
+class _GridResponsivo extends StatelessWidget {
+  final List<Widget> children;
+
+  const _GridResponsivo({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    int crossAxisCount = 2; // móvil por defecto
+
+    if (width >= 1200) {
+      crossAxisCount = 4; // desktop
+    } else if (width >= 600) {
+      crossAxisCount = 3; // tablet
+    }
+
+    return GridView.count(
+      crossAxisCount: crossAxisCount,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.3,
+      children: children,
     );
   }
 }

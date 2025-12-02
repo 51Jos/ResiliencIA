@@ -96,6 +96,55 @@ class PuntoEvolucion {
   });
 }
 
+/// Rangos de fecha predefinidos
+enum RangoFecha {
+  hoy,
+  estaSemana,
+  esteMes,
+  personalizado,
+}
+
+extension RangoFechaExtension on RangoFecha {
+  String get nombre {
+    switch (this) {
+      case RangoFecha.hoy:
+        return 'Hoy';
+      case RangoFecha.estaSemana:
+        return 'Esta semana';
+      case RangoFecha.esteMes:
+        return 'Este mes';
+      case RangoFecha.personalizado:
+        return 'Personalizado';
+    }
+  }
+
+  /// Obtiene el rango de fechas para el filtro seleccionado
+  (DateTime, DateTime) obtenerRango() {
+    final ahora = DateTime.now();
+    final hoy = DateTime(ahora.year, ahora.month, ahora.day);
+
+    switch (this) {
+      case RangoFecha.hoy:
+        // Desde las 00:00 hasta las 23:59:59 de hoy
+        return (hoy, hoy.add(const Duration(days: 1, milliseconds: -1)));
+
+      case RangoFecha.estaSemana:
+        // Desde el lunes de esta semana hasta hoy
+        final inicioSemana = hoy.subtract(Duration(days: ahora.weekday - 1));
+        return (inicioSemana, hoy.add(const Duration(days: 1, milliseconds: -1)));
+
+      case RangoFecha.esteMes:
+        // Desde el día 1 del mes actual hasta hoy
+        final inicioMes = DateTime(ahora.year, ahora.month, 1);
+        return (inicioMes, hoy.add(const Duration(days: 1, milliseconds: -1)));
+
+      case RangoFecha.personalizado:
+        // Se usarán las fechas personalizadas del filtro
+        return (hoy, hoy);
+    }
+  }
+}
+
 /// Filtros para búsqueda y reportes
 class FiltrosAdministracion {
   final String? busqueda;
@@ -106,6 +155,7 @@ class FiltrosAdministracion {
   final DateTime? fechaDesde;
   final DateTime? fechaHasta;
   final OrdenEstudiantes orden;
+  final RangoFecha rangoFecha;
 
   const FiltrosAdministracion({
     this.busqueda,
@@ -116,7 +166,17 @@ class FiltrosAdministracion {
     this.fechaDesde,
     this.fechaHasta,
     this.orden = OrdenEstudiantes.nombreAZ,
+    this.rangoFecha = RangoFecha.hoy, // Por defecto: solo hoy
   });
+
+  /// Obtiene las fechas efectivas según el rango seleccionado
+  (DateTime?, DateTime?) get fechasEfectivas {
+    if (rangoFecha == RangoFecha.personalizado) {
+      return (fechaDesde, fechaHasta);
+    }
+    final rango = rangoFecha.obtenerRango();
+    return (rango.$1, rango.$2);
+  }
 
   /// Copia con cambios
   FiltrosAdministracion copyWith({
@@ -128,6 +188,7 @@ class FiltrosAdministracion {
     DateTime? fechaDesde,
     DateTime? fechaHasta,
     OrdenEstudiantes? orden,
+    RangoFecha? rangoFecha,
   }) {
     return FiltrosAdministracion(
       busqueda: busqueda ?? this.busqueda,
@@ -138,6 +199,7 @@ class FiltrosAdministracion {
       fechaDesde: fechaDesde ?? this.fechaDesde,
       fechaHasta: fechaHasta ?? this.fechaHasta,
       orden: orden ?? this.orden,
+      rangoFecha: rangoFecha ?? this.rangoFecha,
     );
   }
 

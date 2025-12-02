@@ -46,8 +46,8 @@ class _TestAnsiedadVistaState extends State<TestAnsiedadVista> {
     setState(() => _cargando = true);
 
     try {
-      // Calcular resultado
-      final resultado = _testServicio.calcularResultado(
+      // Calcular resultado usando el sistema experto
+      final resultado = await _testServicio.calcularResultado(
         usuarioId: widget.usuarioId,
         respuestas: _respuestas,
       );

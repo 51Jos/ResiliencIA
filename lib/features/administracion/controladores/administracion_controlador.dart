@@ -47,13 +47,38 @@ class AdministracionControlador extends ChangeNotifier {
   }
 
   /// Carga la lista de estudiantes
-  Future<void> cargarEstudiantes() async {
+  Future<void> cargarEstudiantes({bool forzarRecarga = false}) async {
     _cargando = true;
     _error = null;
     notifyListeners();
 
     try {
-      _estudiantes = await _servicio.obtenerEstudiantes(filtros: _filtros);
+      // Primero obtener estudiantes
+      _estudiantes = await _servicio.obtenerEstudiantes(
+        filtros: _filtros,
+        forzarRecarga: forzarRecarga,
+      );
+
+      // Si hay estudiantes sin nivel de ansiedad, sincronizar automáticamente
+      // CAMBIO: No verificar totalTests porque ese campo tampoco existe en usuarios antiguos
+      final estudiantesSinDatos = _estudiantes.where((e) => e.ultimoNivelAnsiedad == null).toList();
+
+      if (estudiantesSinDatos.isNotEmpty) {
+       
+        // Obtener fechas efectivas según el rango seleccionado
+        final fechas = _filtros.fechasEfectivas;
+        await _servicio.sincronizarDatosEstudiantes(
+          fechaDesde: fechas.$1,
+          fechaHasta: fechas.$2,
+        );
+
+        // Recargar lista después de sincronizar
+        _estudiantes = await _servicio.obtenerEstudiantes(
+          filtros: _filtros,
+          forzarRecarga: true,
+        );
+        }
+
       _error = null;
     } catch (e) {
       _error = 'Error al cargar estudiantes: ${e.toString()}';
@@ -157,6 +182,7 @@ class AdministracionControlador extends ChangeNotifier {
     DateTime? fechaDesde,
     DateTime? fechaHasta,
     OrdenEstudiantes? orden,
+    RangoFecha? rangoFecha,
   }) {
     _filtros = _filtros.copyWith(
       busqueda: busqueda,
@@ -167,6 +193,7 @@ class AdministracionControlador extends ChangeNotifier {
       fechaDesde: fechaDesde,
       fechaHasta: fechaHasta,
       orden: orden,
+      rangoFecha: rangoFecha,
     );
     cargarEstudiantes();
   }
@@ -321,5 +348,20 @@ class AdministracionControlador extends ChangeNotifier {
   void limpiarError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Sincroniza los datos de todos los estudiantes con sus últimos tests
+  Future<Map<String, int>> sincronizarDatos() async {
+    try {
+      final fechas = _filtros.fechasEfectivas;
+      return await _servicio.sincronizarDatosEstudiantes(
+        fechaDesde: fechas.$1,
+        fechaHasta: fechas.$2,
+      );
+    } catch (e) {
+      _error = 'Error al sincronizar datos: ${e.toString()}';
+      notifyListeners();
+      rethrow;
+    }
   }
 }

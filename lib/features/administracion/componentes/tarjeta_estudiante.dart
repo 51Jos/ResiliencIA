@@ -123,7 +123,7 @@ class TarjetaEstudiante extends StatelessWidget {
                 Expanded(
                   child: _InfoItem(
                     icono: Icons.school_outlined,
-                    texto: estudiante.programa ?? 'Sin programa',
+                    texto: estudiante.programa ?? 'Sin carrera',
                   ),
                 ),
               ],

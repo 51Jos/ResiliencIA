@@ -113,6 +113,170 @@ class _ResultadoTestVistaState extends State<ResultadoTestVista> {
     }
   }
 
+  /// Construye las recomendaciones organizadas del sistema experto
+  List<Widget> _construirRecomendacionesOrganizadas() {
+    final recomendaciones = widget.resultado.actividadesRecomendadas;
+    final widgets = <Widget>[];
+
+    if (recomendaciones.isEmpty) {
+      return [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: ColoresApp.fondoBlanco,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: ColoresApp.bordeDivisor),
+          ),
+          child: const Text(
+            'No hay recomendaciones disponibles en este momento.',
+            style: TextStyle(
+              fontSize: 14,
+              color: ColoresApp.textoMedio,
+            ),
+          ),
+        ),
+      ];
+    }
+
+    // Los primeros elementos son los mensajes del sistema experto
+    // Verificar si hay mensajes generales (sin ":")
+    int indexRecomendaciones = 0;
+
+    // Mensaje principal y de tipo (sin ":")
+    while (indexRecomendaciones < recomendaciones.length &&
+        !recomendaciones[indexRecomendaciones].contains(':')) {
+      final mensaje = recomendaciones[indexRecomendaciones];
+      widgets.add(
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: ColoresApp.primario.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: ColoresApp.primario.withValues(alpha: 0.3),
+              width: 2,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.psychology,
+                color: ColoresApp.primario,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  mensaje,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: ColoresApp.textoOscuro,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      indexRecomendaciones++;
+    }
+
+    // Recomendaciones específicas (acciones concretas)
+    if (indexRecomendaciones < recomendaciones.length) {
+      widgets.add(
+        const Padding(
+          padding: EdgeInsets.only(top: 8, bottom: 16),
+          child: Text(
+            'Acciones Recomendadas:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: ColoresApp.textoOscuro,
+            ),
+          ),
+        ),
+      );
+    }
+
+    int contador = 1;
+    for (int i = indexRecomendaciones; i < recomendaciones.length; i++) {
+      final recomendacion = recomendaciones[i];
+
+      final isPrioridad = recomendacion.contains('IMPORTANTE') ||
+                          recomendacion.contains('URGENTE') ||
+                          recomendacion.contains('PRIORIDAD');
+
+      widgets.add(
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isPrioridad
+                ? ColoresApp.error.withValues(alpha: 0.1)
+                : ColoresApp.fondoBlanco,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isPrioridad
+                  ? ColoresApp.error
+                  : ColoresApp.bordeDivisor,
+              width: isPrioridad ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isPrioridad
+                      ? ColoresApp.error
+                      : ColoresApp.primario.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '$contador',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isPrioridad
+                          ? Colors.white
+                          : ColoresApp.primario,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  recomendacion.replaceAll('PRIORIDAD: ', '')
+                      .replaceAll('IMPORTANTE: ', '')
+                      .replaceAll('URGENTE: ', ''),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: ColoresApp.textoOscuro,
+                    fontWeight: isPrioridad
+                        ? FontWeight.w500
+                        : FontWeight.normal,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      contador++;
+    }
+
+    return widgets;
+  }
+
   Color _getColorIntensidad(int puntaje) {
     switch (puntaje) {
       case 0:
@@ -463,9 +627,9 @@ class _ResultadoTestVistaState extends State<ResultadoTestVista> {
                       ),
                     ),
 
-                  // Actividades Recomendadas
+                  // Recomendaciones del Sistema Experto
                   const Text(
-                    'Actividades Recomendadas',
+                    'Recomendaciones Personalizadas',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -474,7 +638,7 @@ class _ResultadoTestVistaState extends State<ResultadoTestVista> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Sigue estas recomendaciones para manejar tu ansiedad:',
+                    'Basadas en tu perfil de ansiedad y síntomas específicos:',
                     style: TextStyle(
                       fontSize: 14,
                       color: ColoresApp.textoMedio,
@@ -482,73 +646,8 @@ class _ResultadoTestVistaState extends State<ResultadoTestVista> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Lista de actividades
-                  ...widget.resultado.actividadesRecomendadas
-                      .asMap()
-                      .entries
-                      .map((entry) {
-                    final index = entry.key;
-                    final actividad = entry.value;
-                    final isPrioridad = actividad.contains('PRIORIDAD');
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isPrioridad
-                            ? ColoresApp.error.withValues(alpha: 0.1)
-                            : ColoresApp.fondoBlanco,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isPrioridad
-                              ? ColoresApp.error
-                              : ColoresApp.bordeDivisor,
-                          width: isPrioridad ? 2 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: isPrioridad
-                                  ? ColoresApp.error
-                                  : ColoresApp.primario.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${index + 1}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: isPrioridad
-                                      ? Colors.white
-                                      : ColoresApp.primario,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              actividad.replaceAll('PRIORIDAD: ', ''),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: ColoresApp.textoOscuro,
-                                fontWeight: isPrioridad
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                  // Mostrar recomendaciones organizadas
+                  ..._construirRecomendacionesOrganizadas(),
 
                   const SizedBox(height: 32),
 

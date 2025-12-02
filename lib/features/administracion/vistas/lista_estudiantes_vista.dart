@@ -5,6 +5,7 @@ import '../../../compartidos/componentes/campos/campo_texto.dart';
 import '../controladores/administracion_controlador.dart';
 import '../componentes/tarjeta_estudiante.dart';
 import '../componentes/panel_filtros.dart';
+import '../modelos/estadisticas_globales.dart';
 import 'perfil_estudiante_vista.dart';
 import 'estadisticas_vista.dart';
 
@@ -88,26 +89,75 @@ class _ListaEstudiantesVistaState extends State<ListaEstudiantesVista> {
         builder: (context, controlador, _) {
           return Column(
             children: [
-              // Barra de búsqueda
+              // Barra de búsqueda y filtro de fecha
               Container(
                 color: ColoresApp.fondoBlanco,
                 padding: const EdgeInsets.all(16),
-                child: CampoTexto(
-                  controlador: _busquedaController,
-                  placeholder: 'Buscar por nombre, código o email...',
-                  icono: Icons.search,
-                  alCambiar: (valor) {
-                    controlador.buscar(valor);
-                  },
-                  sufijo: _busquedaController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _busquedaController.clear();
-                            controlador.buscar('');
-                          },
-                        )
-                      : null,
+                child: Column(
+                  children: [
+                    // Selector de rango de fechas
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 20,
+                          color: ColoresApp.textoMedio,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButtonFormField<RangoFecha>(
+                            value: controlador.filtros.rangoFecha,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            items: RangoFecha.values.map((rango) {
+                              return DropdownMenuItem(
+                                value: rango,
+                                child: Text(rango.nombre),
+                              );
+                            }).toList(),
+                            onChanged: (valor) {
+                              if (valor != null) {
+                                if (valor == RangoFecha.personalizado) {
+                                  _mostrarSelectorFechaPersonalizada(context, controlador);
+                                } else {
+                                  controlador.actualizarFiltro(rangoFecha: valor);
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                        if (controlador.filtros.rangoFecha == RangoFecha.personalizado &&
+                            (controlador.filtros.fechaDesde != null || controlador.filtros.fechaHasta != null))
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            tooltip: 'Editar fechas',
+                            onPressed: () => _mostrarSelectorFechaPersonalizada(context, controlador),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Campo de búsqueda
+                    CampoTexto(
+                      controlador: _busquedaController,
+                      placeholder: 'Buscar por nombre, código o email...',
+                      icono: Icons.search,
+                      alCambiar: (valor) {
+                        controlador.buscar(valor);
+                      },
+                      sufijo: _busquedaController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _busquedaController.clear();
+                                controlador.buscar('');
+                              },
+                            )
+                          : null,
+                    ),
+                  ],
                 ),
               ),
 
@@ -300,6 +350,97 @@ class _ListaEstudiantesVistaState extends State<ListaEstudiantesVista> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Muestra un diálogo para seleccionar un rango de fechas personalizado
+  void _mostrarSelectorFechaPersonalizada(
+    BuildContext context,
+    AdministracionControlador controlador,
+  ) async {
+    DateTime? fechaDesde = controlador.filtros.fechaDesde;
+    DateTime? fechaHasta = controlador.filtros.fechaHasta;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Seleccionar rango de fechas'),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Fecha desde
+                ListTile(
+                  title: const Text('Desde'),
+                  subtitle: Text(
+                    fechaDesde != null
+                        ? '${fechaDesde!.day}/${fechaDesde!.month}/${fechaDesde!.year}'
+                        : 'Sin fecha',
+                  ),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    final fecha = await showDatePicker(
+                      context: context,
+                      initialDate: fechaDesde ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (fecha != null) {
+                      setState(() {
+                        fechaDesde = fecha;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                // Fecha hasta
+                ListTile(
+                  title: const Text('Hasta'),
+                  subtitle: Text(
+                    fechaHasta != null
+                        ? '${fechaHasta!.day}/${fechaHasta!.month}/${fechaHasta!.year}'
+                        : 'Sin fecha',
+                  ),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    final fecha = await showDatePicker(
+                      context: context,
+                      initialDate: fechaHasta ?? DateTime.now(),
+                      firstDate: fechaDesde ?? DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (fecha != null) {
+                      setState(() {
+                        fechaHasta = fecha;
+                      });
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (fechaDesde != null || fechaHasta != null) {
+                controlador.actualizarFiltro(
+                  rangoFecha: RangoFecha.personalizado,
+                  fechaDesde: fechaDesde,
+                  fechaHasta: fechaHasta,
+                );
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Aplicar'),
+          ),
+        ],
       ),
     );
   }

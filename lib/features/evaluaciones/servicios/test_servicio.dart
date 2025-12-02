@@ -3,6 +3,7 @@ import '../modelos/pregunta_beck.dart';
 import '../modelos/resultado_test.dart';
 import 'encriptacion_servicio.dart';
 import '../../notificaciones/servicios/notificaciones_servicio.dart';
+import 'sistema_experto_servicio.dart';
 
 /// Servicio para gestionar tests de ansiedad y sus resultados
 class TestServicio {
@@ -142,36 +143,37 @@ class TestServicio {
         .collection('tests_ansiedad')
         .add(datosEncriptados);
 
-    print('✅ Test guardado con ID: ${docRef.id}');
 
     // ⭐ ACTUALIZAR PERFIL DEL USUARIO con datos del último test
     await _actualizarPerfilUsuario(resultado);
 
-    // RF23: Si el nivel de ansiedad es grave, crear alerta para psicólogo
-    if (resultado.nivelAnsiedad == NivelAnsiedad.moderadaGrave ||
+    // RF23: Si el nivel de ansiedad es moderada o mayor, crear alerta para psicólogo
+    if (resultado.nivelAnsiedad == NivelAnsiedad.moderada ||
+        resultado.nivelAnsiedad == NivelAnsiedad.moderadaGrave ||
         resultado.nivelAnsiedad == NivelAnsiedad.severa) {
+      print('🚨 Nivel de ansiedad grave detectado: ${resultado.nivelAnsiedad.name}');
 
-      
-      try {
-        // Obtener nombre del estudiante desde Firestore
-        final usuarioDoc = await _firestore
-            .collection('usuarios')
-            .doc(resultado.usuarioId)
-            .get();
+      // Obtener nombre del estudiante desde Firestore
+      final usuarioDoc = await _firestore
+          .collection('usuarios')
+          .doc(resultado.usuarioId)
+          .get();
 
-        if (usuarioDoc.exists) {
-          final nombreCompleto = usuarioDoc.data()?['nombreCompleto'] as String? ?? 'Estudiante';
+      if (usuarioDoc.exists) {
+        final nombreCompleto = usuarioDoc.data()?['nombreCompleto'] as String? ?? 'Estudiante';
 
-          await _notificacionesServicio.crearAlertaAnsiedadGrave(
-            estudianteId: resultado.usuarioId,
-            estudianteNombre: nombreCompleto,
-            nivelAnsiedad: resultado.nivelAnsiedad,
-            puntajeTest: resultado.puntajeTotal,
-          );
+        print('👤 Creando notificación para: $nombreCompleto');
+        final notifId = await _notificacionesServicio.crearAlertaAnsiedadGrave(
+          estudianteId: resultado.usuarioId,
+          estudianteNombre: nombreCompleto,
+          nivelAnsiedad: resultado.nivelAnsiedad,
+          puntajeTest: resultado.puntajeTotal,
+        );
 
-         }
-      } catch (e) {
-       // No lanzar error para no interrumpir el guardado del test
+        print('✅ Notificación creada con ID: $notifId');
+        print('📱 Las notificaciones push las enviará el ListenerNotificacionesServicio');
+      } else {
+        print('❌ Usuario no encontrado: ${resultado.usuarioId}');
       }
     }
 
@@ -183,7 +185,6 @@ class TestServicio {
   /// sin hacer queries adicionales por cada estudiante
   Future<void> _actualizarPerfilUsuario(ResultadoTest resultado) async {
     try {
-      print('📊 Actualizando perfil de usuario...');
 
       // Contar total de tests del estudiante
       final testsSnapshot = await _firestore
@@ -206,9 +207,7 @@ class TestServicio {
         'requiereAtencion': requiereAtencion,
       });
 
-      print('✅ Perfil actualizado: nivel=${resultado.nivelAnsiedad.name}, puntaje=${resultado.puntajeTotal}, total=$totalTests');
     } catch (e) {
-      print('⚠️ Error al actualizar perfil: $e');
       // No lanzar error, es una operación secundaria
     }
   }
@@ -225,18 +224,38 @@ class TestServicio {
   }
 
   /// Calcula el resultado basado en las respuestas
-  ResultadoTest calcularResultado({
+  Future<ResultadoTest> calcularResultado({
     required String usuarioId,
     required Map<int, int> respuestas,
-  }) {
+  }) async {
     // Calcula el puntaje total
     final puntajeTotal = respuestas.values.reduce((a, b) => a + b);
 
     // Determina el nivel de ansiedad
     final nivelAnsiedad = InventarioBeck.calcularNivel(puntajeTotal);
 
-    // Obtiene actividades recomendadas
-    final actividades = ActividadesRecomendadas.obtenerPorNivel(nivelAnsiedad);
+    // Usa el sistema experto para generar recomendaciones personalizadas
+    final analisis = await SistemaExpertoServicio.analizarResultados(
+      respuestas: respuestas,
+      puntajeTotal: puntajeTotal,
+      nivelAnsiedad: nivelAnsiedad,
+    );
+
+    // Construye las actividades recomendadas con los mensajes del sistema experto
+    final actividades = <String>[];
+
+    // Agrega mensaje principal si existe
+    if (analisis.mensajePrincipal.isNotEmpty) {
+      actividades.add(analisis.mensajePrincipal);
+    }
+
+    // Agrega mensaje de tipo si existe
+    if (analisis.mensajeTipo.isNotEmpty) {
+      actividades.add(analisis.mensajeTipo);
+    }
+
+    // Agrega las recomendaciones personalizadas
+    actividades.addAll(analisis.recomendacionesPersonalizadas);
 
     // Crea el resultado
     return ResultadoTest(
@@ -246,12 +265,13 @@ class TestServicio {
       respuestas: respuestas,
       puntajeTotal: puntajeTotal,
       nivelAnsiedad: nivelAnsiedad,
-      requiereDerivacion: nivelAnsiedad.requiereDerivacion,
+      requiereDerivacion: analisis.requiereDerivacion,
       actividadesRecomendadas: actividades,
-      derivadoPsicologo: nivelAnsiedad.requiereDerivacion,
-      fechaDerivacion: nivelAnsiedad.requiereDerivacion
+      derivadoPsicologo: analisis.requiereDerivacion,
+      fechaDerivacion: analisis.requiereDerivacion
           ? DateTime.now()
           : null,
+      observaciones: analisis.mensajeDerivacion,
     );
   }
 

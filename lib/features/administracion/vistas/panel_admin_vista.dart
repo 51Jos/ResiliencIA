@@ -6,6 +6,7 @@ import '../controladores/administracion_controlador.dart';
 import 'lista_estudiantes_vista.dart';
 import 'estadisticas_vista.dart';
 import '../../notificaciones/vistas/notificaciones_vista.dart';
+import '../../notificaciones/servicios/listener_notificaciones_servicio.dart';
 
 /// Panel principal de administración con navegación integrada
 /// Punto de entrada para administradores/psicólogos
@@ -27,6 +28,21 @@ class PanelAdminVista extends StatefulWidget {
 
 class _PanelAdminVistaState extends State<PanelAdminVista> {
   int _indiceActual = 0;
+  final ListenerNotificacionesServicio _listenerNotificaciones = ListenerNotificacionesServicio();
+
+  @override
+  void initState() {
+    super.initState();
+    // Iniciar listener de notificaciones en tiempo real
+    _listenerNotificaciones.iniciarListener(widget.psicologoId);
+  }
+
+  @override
+  void dispose() {
+    // Detener listener cuando se cierre la vista
+    _listenerNotificaciones.detenerListener();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +53,7 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
           _indiceActual = indice;
         });
       },
+      psicologoId: widget.psicologoId,
       appBar: AppBar(
         title: Text(_obtenerTitulo()),
         backgroundColor: ColoresApp.primario,
@@ -147,6 +164,7 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
         // Vista de notificaciones
         return NotificacionesVista(
           psicologoId: widget.psicologoId,
+          psicologoNombre: widget.psicologoNombre,
         );
       case 3:
         // Vista de configuración (placeholder)

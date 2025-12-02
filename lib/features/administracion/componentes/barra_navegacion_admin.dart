@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../../compartidos/tema/colores_app.dart';
+import '../../notificaciones/servicios/notificaciones_servicio.dart';
 
 /// Barra de navegación adaptativa para administradores
 /// Muestra un NavigationRail en web/tablet y un BottomNavigationBar en móvil
 class BarraNavegacionAdmin extends StatelessWidget {
   final int indiceActual;
   final Function(int) alCambiar;
+  final String? psicologoId; // Para mostrar contador de notificaciones
 
   const BarraNavegacionAdmin({
     super.key,
     required this.indiceActual,
     required this.alCambiar,
+    this.psicologoId,
   });
 
   @override
@@ -61,23 +64,23 @@ class BarraNavegacionAdmin extends StatelessWidget {
 
   /// Destinos para NavigationRail (web/tablet)
   List<NavigationRailDestination> _obtenerDestinos({required bool esWeb}) {
-    return const [
-      NavigationRailDestination(
+    return [
+      const NavigationRailDestination(
         icon: Icon(Icons.people_outline),
         selectedIcon: Icon(Icons.people),
         label: Text('Estudiantes'),
       ),
-      NavigationRailDestination(
+      const NavigationRailDestination(
         icon: Icon(Icons.assessment_outlined),
         selectedIcon: Icon(Icons.assessment),
         label: Text('Estadísticas'),
       ),
       NavigationRailDestination(
-        icon: Icon(Icons.notifications_outlined),
-        selectedIcon: Icon(Icons.notifications),
-        label: Text('Notificaciones'),
+        icon: _buildIconoNotificaciones(false),
+        selectedIcon: _buildIconoNotificaciones(true),
+        label: const Text('Notificaciones'),
       ),
-      NavigationRailDestination(
+      const NavigationRailDestination(
         icon: Icon(Icons.settings_outlined),
         selectedIcon: Icon(Icons.settings),
         label: Text('Configuración'),
@@ -87,28 +90,49 @@ class BarraNavegacionAdmin extends StatelessWidget {
 
   /// Items para BottomNavigationBar (móvil)
   List<BottomNavigationBarItem> _obtenerItemsNavegacion() {
-    return const [
-      BottomNavigationBarItem(
+    return [
+      const BottomNavigationBarItem(
         icon: Icon(Icons.people_outline),
         activeIcon: Icon(Icons.people),
         label: 'Estudiantes',
       ),
-      BottomNavigationBarItem(
+      const BottomNavigationBarItem(
         icon: Icon(Icons.assessment_outlined),
         activeIcon: Icon(Icons.assessment),
         label: 'Estadísticas',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.notifications_outlined),
-        activeIcon: Icon(Icons.notifications),
+        icon: _buildIconoNotificaciones(false),
+        activeIcon: _buildIconoNotificaciones(true),
         label: 'Notificaciones',
       ),
-      BottomNavigationBarItem(
+      const BottomNavigationBarItem(
         icon: Icon(Icons.settings_outlined),
         activeIcon: Icon(Icons.settings),
         label: 'Configuración',
       ),
     ];
+  }
+
+  /// Construye el icono de notificaciones con badge
+  Widget _buildIconoNotificaciones(bool activo) {
+    if (psicologoId == null) {
+      return Icon(activo ? Icons.notifications : Icons.notifications_outlined);
+    }
+
+    return StreamBuilder<int>(
+      stream: NotificacionesServicio().streamContadorNoLeidas(psicologoId!),
+      builder: (context, snapshot) {
+        final contador = snapshot.data ?? 0;
+
+        return Badge(
+          label: contador > 0 ? Text('$contador') : null,
+          isLabelVisible: contador > 0,
+          backgroundColor: ColoresApp.error,
+          child: Icon(activo ? Icons.notifications : Icons.notifications_outlined),
+        );
+      },
+    );
   }
 }
 
@@ -121,6 +145,7 @@ class ScaffoldAdminAdaptativo extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget? floatingActionButton;
   final Color? backgroundColor;
+  final String? psicologoId; // Para mostrar contador de notificaciones
 
   const ScaffoldAdminAdaptativo({
     super.key,
@@ -130,6 +155,7 @@ class ScaffoldAdminAdaptativo extends StatelessWidget {
     this.appBar,
     this.floatingActionButton,
     this.backgroundColor,
+    this.psicologoId,
   });
 
   @override
@@ -148,6 +174,7 @@ class ScaffoldAdminAdaptativo extends StatelessWidget {
             BarraNavegacionAdmin(
               indiceActual: indiceNavegacion,
               alCambiar: alCambiarNavegacion,
+              psicologoId: psicologoId,
             ),
             const VerticalDivider(thickness: 1, width: 1),
             // Contenido principal
@@ -165,6 +192,7 @@ class ScaffoldAdminAdaptativo extends StatelessWidget {
         bottomNavigationBar: BarraNavegacionAdmin(
           indiceActual: indiceNavegacion,
           alCambiar: alCambiarNavegacion,
+          psicologoId: psicologoId,
         ),
       );
     }

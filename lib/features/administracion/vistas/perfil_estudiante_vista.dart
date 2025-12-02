@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:html' as html;
 import '../../../compartidos/tema/colores_app.dart';
 import '../../../compartidos/componentes/campos/campo_textarea.dart';
-import '../../../compartidos/componentes/campos/campo_fecha.dart';
-import '../../../compartidos/componentes/campos/campo_hora.dart';
 import '../controladores/administracion_controlador.dart';
 import '../modelos/estudiante_info.dart';
 import '../componentes/grafica_evolucion.dart';
@@ -163,103 +162,157 @@ class _PerfilEstudianteVistaState extends State<PerfilEstudianteVista> {
   }
 
   void _mostrarDialogoCita(BuildContext context) {
-    final controlador = context.read<AdministracionControlador>();
-    final motivoController = TextEditingController();
-    DateTime? fechaSeleccionada;
-    TimeOfDay? horaSeleccionada;
-
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Programar cita'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CampoFecha(
-                  etiqueta: 'Fecha de la cita',
-                  alSeleccionar: (fecha) {
-                    setState(() {
-                      fechaSeleccionada = fecha;
-                    });
-                  },
-                  requerido: true,
-                ),
-                const SizedBox(height: 16),
-                CampoHora(
-                  etiqueta: 'Hora de la cita',
-                  alSeleccionar: (hora) {
-                    setState(() {
-                      horaSeleccionada = hora;
-                    });
-                  },
-                  requerido: true,
-                ),
-                const SizedBox(height: 16),
-                CampoTextarea(
-                  controlador: motivoController,
-                  etiqueta: 'Motivo',
-                  placeholder: 'Describe el motivo de la cita...',
-                  lineasMinimas: 3,
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.calendar_today,
+              color: ColoresApp.primario,
+              size: 24,
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (fechaSeleccionada == null || horaSeleccionada == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Por favor completa la fecha y hora'),
-                      backgroundColor: ColoresApp.advertencia,
-                    ),
-                  );
-                  return;
-                }
-
-                final fechaCita = DateTime(
-                  fechaSeleccionada!.year,
-                  fechaSeleccionada!.month,
-                  fechaSeleccionada!.day,
-                  horaSeleccionada!.hour,
-                  horaSeleccionada!.minute,
-                );
-
-                final exito = await controlador.programarCita(
-                  estudianteId: widget.estudiante.uid,
-                  estudianteNombre: widget.estudiante.nombreCompleto,
-                  psicologoId: widget.psicologoId,
-                  psicologoNombre: widget.psicologoNombre,
-                  fechaCita: fechaCita,
-                  motivo: motivoController.text.trim(),
-                );
-
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  if (exito) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Cita programada'),
-                        backgroundColor: ColoresApp.exito,
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColoresApp.primario,
-                foregroundColor: Colors.white,
+            const SizedBox(width: 12),
+            const Text('Programar Cita'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: ColoresApp.primario.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: ColoresApp.primario.withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
-              child: const Text('Programar'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: ColoresApp.primario,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Información Importante',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: ColoresApp.textoOscuro,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Para crear una cita, debes ponerte en contacto con el estudiante para coordinar la disponibilidad de horarios.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: ColoresApp.textoMedio,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          color: ColoresApp.primario,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.estudiante.nombreCompleto,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: ColoresApp.textoOscuro,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.email,
+                          color: ColoresApp.primario,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.estudiante.email,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: ColoresApp.textoMedio,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Una vez coordinado el horario, serás redirigido a la plataforma de gestión de citas para registrarla oficialmente.',
+              style: TextStyle(
+                fontSize: 13,
+                color: ColoresApp.textoMedio,
+                height: 1.4,
+              ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              html.window.open('https://citaspsicologia.globeapp.dev', '_blank');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColoresApp.primario,
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.open_in_new, size: 18),
+            label: const Text('Ir a Plataforma de Citas'),
+          ),
+        ],
       ),
     );
   }

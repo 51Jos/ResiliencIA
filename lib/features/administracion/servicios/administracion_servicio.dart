@@ -119,19 +119,26 @@ class AdministracionServicio {
         }).toList();
       }
 
-      // Aplicar filtro de fechas (cliente)
-      if (filtros?.fechaDesde != null) {
-        estudiantes = estudiantes.where((e) {
-          return e.fechaUltimoTest != null &&
-              e.fechaUltimoTest!.isAfter(filtros!.fechaDesde!);
-        }).toList();
-      }
+      // Aplicar filtro de fechas usando las fechas efectivas del rango
+      if (filtros != null) {
+        final fechasEfectivas = filtros.fechasEfectivas;
+        final fechaDesde = fechasEfectivas.$1;
+        final fechaHasta = fechasEfectivas.$2;
 
-      if (filtros?.fechaHasta != null) {
-        estudiantes = estudiantes.where((e) {
-          return e.fechaUltimoTest != null &&
-              e.fechaUltimoTest!.isBefore(filtros!.fechaHasta!);
-        }).toList();
+        if (fechaDesde != null || fechaHasta != null) {
+          estudiantes = estudiantes.where((e) {
+            // Si el estudiante no tiene fecha de último test, no mostrarlo cuando hay filtro de fecha
+            if (e.fechaUltimoTest == null) return false;
+
+            final fechaTest = e.fechaUltimoTest!;
+
+            // Verificar que esté dentro del rango
+            if (fechaDesde != null && fechaTest.isBefore(fechaDesde)) return false;
+            if (fechaHasta != null && fechaTest.isAfter(fechaHasta)) return false;
+
+            return true;
+          }).toList();
+        }
       }
 
       // Aplicar ordenamiento
@@ -559,6 +566,127 @@ class AdministracionServicio {
           (email != null && email.endsWith('@ucss.edu.pe'));
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Sincroniza los datos de todos los estudiantes con sus últimos tests
+  /// OPTIMIZADO: Hace una sola consulta para todos los tests
+  /// Puede filtrar por rango de fechas para evitar sobrecargar la vista
+  Future<Map<String, int>> sincronizarDatosEstudiantes({
+    DateTime? fechaDesde,
+    DateTime? fechaHasta,
+  }) async {
+    try {
+      int actualizados = 0;
+      int sinTests = 0;
+      int errores = 0;
+
+     if (fechaDesde != null || fechaHasta != null) {
+       }
+
+      // 1. Obtener todos los estudiantes
+      final usuariosSnapshot = await _firestore
+          .collection('usuarios')
+          .where('rol', isEqualTo: 'estudiante')
+          .get();
+
+     // 2. Obtener TODOS los tests de UNA SOLA VEZ (con filtro de fecha opcional)
+      Query<Map<String, dynamic>> testsQuery = _firestore.collection('tests_ansiedad');
+
+      // Aplicar filtros de fecha si se proporcionan
+      if (fechaDesde != null) {
+        testsQuery = testsQuery.where('fechaRealizacion',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(fechaDesde));
+      }
+      if (fechaHasta != null) {
+        testsQuery = testsQuery.where('fechaRealizacion',
+            isLessThanOrEqualTo: Timestamp.fromDate(fechaHasta));
+      }
+
+      final todosTests = await testsQuery.get();
+
+     
+      // 3. Agrupar tests por usuario
+      final testsPorUsuario = <String, List<Map<String, dynamic>>>{};
+      for (var testDoc in todosTests.docs) {
+        final testData = testDoc.data();
+        final usuarioId = testData['usuarioId'] as String;
+
+        if (!testsPorUsuario.containsKey(usuarioId)) {
+          testsPorUsuario[usuarioId] = [];
+        }
+        testsPorUsuario[usuarioId]!.add(testData);
+      }
+
+      // 4. Actualizar cada estudiante
+      final batch = _firestore.batch();
+
+      for (var userDoc in usuariosSnapshot.docs) {
+        final userId = userDoc.id;
+
+        try {
+          final testsDelUsuario = testsPorUsuario[userId] ?? [];
+
+          if (testsDelUsuario.isEmpty) {
+            sinTests++;
+            continue;
+          }
+
+          // Encontrar el test más reciente
+          var ultimoTest = testsDelUsuario.first;
+          var ultimaFecha = (ultimoTest['fechaRealizacion'] as Timestamp).toDate();
+
+          for (var testData in testsDelUsuario) {
+            final fecha = (testData['fechaRealizacion'] as Timestamp).toDate();
+            if (fecha.isAfter(ultimaFecha)) {
+              ultimoTest = testData;
+              ultimaFecha = fecha;
+            }
+          }
+
+          final nivelAnsiedad = ultimoTest['nivelAnsiedad'] as String?;
+          final puntajeTotal = ultimoTest['puntajeTotal'] as int?;
+
+          if (nivelAnsiedad == null || puntajeTotal == null) {
+           errores++;
+            continue;
+          }
+
+          final requiereAtencion = nivelAnsiedad == 'moderadaGrave' ||
+                                   nivelAnsiedad == 'severa';
+
+          // Agregar al batch
+          batch.update(userDoc.reference, {
+            'ultimoNivelAnsiedad': nivelAnsiedad,
+            'puntajeUltimoTest': puntajeTotal,
+            'fechaUltimoTest': ultimoTest['fechaRealizacion'],
+            'totalTests': testsDelUsuario.length,
+            'requiereAtencion': requiereAtencion,
+          });
+
+         actualizados++;
+        } catch (e) {
+          errores++;
+        }
+      }
+
+      // 5. Ejecutar todas las actualizaciones en un solo batch
+      if (actualizados > 0) {
+        await batch.commit();
+      }
+
+      // Invalidar cache después de sincronizar
+      invalidarTodosLosCaches();
+
+
+      return {
+        'actualizados': actualizados,
+        'sinTests': sinTests,
+        'errores': errores,
+        'total': usuariosSnapshot.docs.length,
+      };
+    } catch (e) {
+      rethrow;
     }
   }
 }

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'compartidos/tema/tema_app.dart';
 import 'features/autenticacion/controladores/auth_controlador.dart';
 import 'features/administracion/controladores/administracion_controlador.dart';
-import 'features/notificaciones/servicios/tareas_programadas_servicio.dart';
+import 'features/notificaciones/servicios/notificaciones_locales_servicio.dart';
 import 'rutas/rutas_app.dart';
 import 'nucleo/configuracion_firebase.dart';
 
@@ -11,8 +11,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ConfiguracionFirebase.inicializar();
 
-  // Iniciar tareas programadas (recordatorios automáticos)
-  TareasProgramadasServicio.instance.iniciar();
+  // Inicializar notificaciones push locales
+  await NotificacionesLocalesServicio().inicializar();
 
   runApp(const MyApp());
 }

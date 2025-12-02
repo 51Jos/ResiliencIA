@@ -1,0 +1,373 @@
+{
+  "metadata": {
+    "descripcion": "Base de datos de recomendaciones para sistema experto de ansiedad (BAI)",
+    "version": "2.0",
+    "autor": "IMPLEMENTACION"
+  },
+  "niveles_globales": {
+    "sin_ansiedad": {
+      "rango": [0, 9],
+      "mensajes": [
+        "Tu mente está en calma. Sigue cuidando tu bienestar emocional con tus rutinas actuales.",
+        "Mantén tu equilibrio interior. ¡Vas por muy buen camino!",
+        "Estás gestionando bien tus emociones. Continúa dedicando tiempo a lo que te hace feliz.",
+        "Disfruta de tu tranquilidad y cultiva pensamientos positivos.",
+        "Tus resultados indican estabilidad. Es un buen momento para plantearte nuevas metas académicas."
+      ]
+    },
+    "derivacion_profesional": {
+      "rango": [26, 63],
+      "mensaje_fijo": {
+        "titulo": "Recomendación de Asistencia Profesional",
+        "cuerpo": "Hemos detectado que estás pasando por un momento de ansiedad significativa (Nivel Moderado-Grave o Severo). Lo más valiente e inteligente ahora es permitirnos ayudarte profesionalmente.",
+        "accion": "Por favor, acércate al consultorio de psicología de la universidad.",
+        "datos_contacto": "Edificio de Bienestar, Horario 9am-5pm."
+      }
+    }
+  },
+  "capa_1_general": {
+    "leve": [
+      "Tu nivel de ansiedad es leve. Es el mejor momento para aplicar pequeñas herramientas de autocuidado.",
+      "Estás experimentando una ansiedad manejable. Con pequeños ajustes en tu rutina volverás al equilibrio.",
+      "Tus resultados indican una ansiedad ligera. Respira tranquilo, tienes el control.",
+      "Notas ciertas señales de alerta, pero nada que no puedas gestionar con un poco de pausa."
+    ],
+    "moderada": [
+      "Tu nivel de ansiedad es moderado. Es importante que hoy te priorices a ti mismo.",
+      "Estamos detectando una carga de estrés considerable. Tu cuerpo y mente te están pidiendo atención.",
+      "Tus respuestas muestran que estás pasando por un momento difícil. Vamos a ocuparnos de esto juntos.",
+      "La ansiedad moderada es una señal de que necesitas hacer una pausa activa y aplicar técnicas de regulación."
+    ]
+  },
+  "capa_2_tipo": {
+    "leve": {
+      "fisico": [
+        "Tus síntomas se centran en el cuerpo. El movimiento suave te ayudará más que pensar.",
+        "Tu cuerpo está acumulando pequeña tensión estática. Hidrátate y estira.",
+        "La ansiedad se está manifestando en sensaciones físicas. Conectar con tus sentidos te aliviará."
+      ],
+      "cognitivo": [
+        "Tu mente está un poco ruidosa hoy. Intentemos bajar el volumen de los pensamientos.",
+        "La ansiedad es más mental que física en tu caso. Organizar tus ideas te dará calma.",
+        "Parece que hay preocupaciones dándote vueltas. Escribirlas suele funcionar muy bien."
+      ],
+      "mixto": [
+        "Tienes una mezcla de sensaciones. Lo mejor es una técnica de respiración simple.",
+        "Cuerpo y mente están un poco activados. Busquemos un punto medio de calma."
+      ]
+    },
+    "moderada": {
+      "fisico": [
+        "Tu cuerpo está en modo alerta (lucha o huida). Necesitamos desactivar tu sistema nervioso simpático.",
+        "Sientes la ansiedad 'en la piel'. Las técnicas de temperatura (agua fría/caliente) son tu mejor aliado hoy.",
+        "Hay mucha energía física atrapada. No te quedes quieto, muévete para procesarla."
+      ],
+      "cognitivo": [
+        "Tus pensamientos están yendo muy rápido (rumiación). Necesitamos usar técnicas de anclaje al presente.",
+        "Tu mente te está contando historias de preocupación. Recuerda: los pensamientos no son hechos.",
+        "La carga mental es alta. Es vital que exteriorices lo que sientes hablando o escribiendo."
+      ],
+      "mixto": [
+        "Sientes agobio general. Vamos a aplicar una técnica de 'Grounding' completa.",
+        "La ansiedad te está afectando en varios frentes. Vamos paso a paso para desescalar."
+      ]
+    }
+  },
+  "capa_3_items": [
+    {
+      "id": 1,
+      "sintoma": "Adormecimiento o hormigueo",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Sacude las manos vigorosamente por 10 segundos.", "Haz rotaciones de muñecas y tobillos."],
+          "noche": ["Date un baño tibio para relajar los nervios.", "Estírate suavemente en la cama."]
+        },
+        "moderada": {
+          "dia": ["Pisa fuerte contra el suelo para sentir tus pies.", "Frota tus extremidades con una toalla áspera."],
+          "noche": ["Usa una manta pesada para mejorar la propiocepción.", "Masajea las zonas adormecidas con aceite."]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "sintoma": "Acaloramiento / Sudoración",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Bebe un vaso de agua fría.", "Busca una ventana abierta."],
+          "noche": ["Usa ropa de algodón ligera.", "Voltea la almohada al lado fresco."]
+        },
+        "moderada": {
+          "dia": ["Lava tus muñecas y cara con agua helada.", "Sal al aire libre inmediatamente."],
+          "noche": ["Pon un paño húmedo en tu frente.", "Practica la respiración refrescante (Sitali)."]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "sintoma": "Temblores en las piernas",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Camina un poco para soltar la tensión.", "Haz 5 sentadillas suaves."],
+          "noche": ["Coloca un cojín bajo tus rodillas.", "Estira los gemelos."]
+        },
+        "moderada": {
+          "dia": ["Contrae fuerte los músculos de las piernas y suelta.", "Sube y baja escaleras rápido."],
+          "noche": ["Aplica calor local en los muslos.", "Realiza la relajación progresiva de Jacobson."]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "sintoma": "Inquietud / Incapaz de relajarse",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Cambia de actividad o de lugar físico.", "Escucha una canción instrumental."],
+          "noche": ["Aleja el celular de la cama.", "Lee algo ligero."]
+        },
+        "moderada": {
+          "dia": ["Usa una pelota antiestrés.", "Practica la respiración cuadrada (4-4-4-4)."],
+          "noche": ["Escucha ruido blanco o lluvia.", "Haz un 'vaciado mental' en un papel."]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "sintoma": "Temor a que ocurra lo peor",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Pregúntate: ¿Qué pruebas tengo de esto?", "Enfócate en la tarea actual."],
+          "noche": ["Visualiza un lugar seguro.", "Recuerda tres cosas buenas de hoy."]
+        },
+        "moderada": {
+          "dia": ["Escribe el miedo y rómpelo.", "Llama a un amigo para distraerte."],
+          "noche": ["Escucha un audiolibro narrativo.", "Repite: 'Esto es solo un pensamiento'."]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "sintoma": "Mareo o aturdimiento",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Fija la vista en un punto lejano.", "Bebe agua, podrías estar deshidratado."],
+          "noche": ["Siéntate en la cama antes de levantarte.", "Duerme con la cabeza elevada."]
+        },
+        "moderada": {
+          "dia": ["Siéntate y pon la cabeza entre las rodillas.", "Come algo dulce (fruta)."],
+          "noche": ["No cierres los ojos de golpe, busca un punto de luz.", "Acuéstate y pon la mano en tu abdomen."]
+        }
+      }
+    },
+    {
+      "id": 7,
+      "sintoma": "Pérdida de conciencia / Latidos fuertes",
+      "nota": "Según tu imagen es 'Pérdida conciencia', en Beck original es 'Corazón'. Cubro ambos conceptos.",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Respira lento para bajar las pulsaciones.", "Siéntate derecho."],
+          "noche": ["Acuéstate sobre el lado derecho.", "Evita pantallas."]
+        },
+        "moderada": {
+          "dia": ["Maniobra Vagal: Tápate la nariz y sopla suave.", "Mójate la cara con agua muy fría."],
+          "noche": ["Siéntate en el borde de la cama, no te acuestes plano.", "Respira inflando la barriga."]
+        }
+      }
+    },
+    {
+      "id": 8,
+      "sintoma": "Sensación de inestabilidad",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Apóyate en una pared firme.", "Camina despacio sintiendo tus pasos."],
+          "noche": ["Asegura tu entorno (luz tenue).", "No hagas movimientos bruscos."]
+        },
+        "moderada": {
+          "dia": ["Siéntate en el suelo (Grounding físico).", "Mira 5 objetos cuadrados."],
+          "noche": ["Duerme en posición fetal.", "Usa calcetines para sentir los pies."]
+        }
+      }
+    },
+    {
+      "id": 9,
+      "sintoma": "Atemorizado o asustado",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Habla con alguien cercano.", "Sal a un lugar con gente."],
+          "noche": ["Abraza una almohada.", "Deja una luz encendida."]
+        },
+        "moderada": {
+          "dia": ["Identifica que el miedo es una emoción, no la realidad.", "Respira 10 veces profundo."],
+          "noche": ["Meditación de autocompasión.", "Escucha voces humanas (radio/podcast) calmadas."]
+        }
+      }
+    },
+    {
+      "id": 10,
+      "sintoma": "Nervioso",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Haz una lista de tareas simple.", "Estira el cuello."],
+          "noche": ["Toma una infusión caliente.", "Desconecta el WiFi."]
+        },
+        "moderada": {
+          "dia": ["Divide lo que tienes que hacer en pasos micro.", "Sal a caminar rápido."],
+          "noche": ["Técnica 5-4-3-2-1 sentidos.", "Baño caliente."]
+        }
+      }
+    },
+    {
+      "id": 11,
+      "sintoma": "Sensación de bloqueo",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Bebe agua.", "Haz garabatos en un papel."],
+          "noche": ["No te fuerces a pensar en soluciones ahora.", "Relaja la mandíbula."]
+        },
+        "moderada": {
+          "dia": ["Sal del lugar donde estás.", "Habla en voz alta lo que sientes."],
+          "noche": ["Visualiza tus pensamientos como nubes pasando.", "Escucha música sin letra."]
+        }
+      }
+    },
+    {
+      "id": 12,
+      "sintoma": "Temblores en las manos",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Sacude las manos.", "Abre y cierra los puños."],
+          "noche": ["Masajea tus manos.", "Evita el celular."]
+        },
+        "moderada": {
+          "dia": ["Sostén algo frío.", "Presiona las palmas contra una mesa."],
+          "noche": ["Relajación muscular progresiva de brazos.", "Abrígate bien."]
+        }
+      }
+    },
+    {
+      "id": 13,
+      "sintoma": "Inquieto, inseguro",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Haz una postura de poder (manos en cintura).", "Recuerda un éxito pasado."],
+          "noche": ["Escribe 3 cosas que hiciste bien hoy.", "Planifica tu ropa de mañana."]
+        },
+        "moderada": {
+          "dia": ["Llama a alguien que te valide.", "Haz algo que domines bien."],
+          "noche": ["No tomes decisiones importantes ahora.", "Duerme con peso (mantas)."]
+        }
+      }
+    },
+    {
+      "id": 14,
+      "sintoma": "Miedo a perder el control",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Organiza tu entorno.", "Respira contando tiempos."],
+          "noche": ["Rutina estricta de sueño.", "Lectura calmada."]
+        },
+        "moderada": {
+          "dia": ["Repite: 'Esto es ansiedad, y pasará'.", "Busca un lugar seguro."],
+          "noche": ["Céntrate solo en tu respiración.", "No luches, deja que la sensación fluya."]
+        }
+      }
+    },
+    {
+      "id": 15,
+      "sintoma": "Sensación de ahogo",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Abre los brazos y el pecho.", "Bosteza intencionalmente."],
+          "noche": ["Ventila la habitación.", "Duerme de lado."]
+        },
+        "moderada": {
+          "dia": ["Respira con los labios fruncidos.", "Pon la mano en el estómago y respira ahí."],
+          "noche": ["Siéntate e inclínate hacia adelante.", "Aire fresco en la cara."]
+        }
+      }
+    },
+    {
+      "id": 16,
+      "sintoma": "Temor a morir",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Tócate el pulso y siente que es fuerte.", "Mira a tu alrededor, estás a salvo."],
+          "noche": ["Recuerda que es solo una sensación.", "Abraza algo suave."]
+        },
+        "moderada": {
+          "dia": ["Llama a alguien.", "Repite: 'Es ansiedad, no peligro'."],
+          "noche": ["Escucha una meditación guiada.", "No busques síntomas en internet."]
+        }
+      }
+    },
+    {
+      "id": 17,
+      "sintoma": "Con miedo",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Identifica el miedo.", "Sigue con tu rutina."],
+          "noche": ["Piensa en un lugar feliz.", "Relaja los hombros."]
+        },
+        "moderada": {
+          "dia": ["Enfócate en objetos externos.", "Camina."],
+          "noche": ["Escribe el miedo y guárdalo.", "Respiración 4-7-8."]
+        }
+      }
+    },
+    {
+      "id": 18,
+      "sintoma": "Problemas digestivos",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Evita café y picante.", "Bebe té de manzanilla."],
+          "noche": ["Cena ligero.", "Bolsa de agua caliente."]
+        },
+        "moderada": {
+          "dia": ["Respira profundo.", "Camina suavemente."],
+          "noche": ["Duerme sobre el lado izquierdo.", "Masaje abdominal."]
+        }
+      }
+    },
+    {
+      "id": 19,
+      "sintoma": "Desvanecimientos",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Siéntate despacio.", "Come algo."],
+          "noche": ["Levántate con cuidado.", "Hidrátate."]
+        },
+        "moderada": {
+          "dia": ["Recuéstate y eleva las piernas.", "Pide ayuda."],
+          "noche": ["No cierres la puerta con llave.", "Ten el teléfono cerca."]
+        }
+      }
+    },
+    {
+      "id": 20,
+      "sintoma": "Rubor facial",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Bebe agua fría.", "No te tapes la cara."],
+          "noche": ["Lávate con agua fresca.", "Crema hidratante."]
+        },
+        "moderada": {
+          "dia": ["Enfócate en el exterior.", "Respira."],
+          "noche": ["Paños fríos.", "Visualiza frío."]
+        }
+      }
+    },
+    {
+      "id": 21,
+      "sintoma": "Sudores, fríos o calientes",
+      "recomendaciones": {
+        "leve": {
+          "dia": ["Quítate una capa de ropa.", "Busca aire."],
+          "noche": ["Sábanas de algodón.", "Habitación fresca."]
+        },
+        "moderada": {
+          "dia": ["Agua fría en nuca.", "Respira lento."],
+          "noche": ["Ducha tibia.", "No te cubras mucho."]
+        }
+      }
+    }
+  ]
+}

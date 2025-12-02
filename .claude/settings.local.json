@@ -31,7 +31,10 @@
       "Bash(flutter build:*)",
       "Bash(npm --version:*)",
       "Bash(npm install:*)",
-      "Bash(firebase login:*)"
+      "Bash(firebase login:*)",
+      "Bash(flutter logs:*)",
+      "Bash(copy:*)",
+      "Bash(nc:*)"
     ],
     "deny": [],
     "ask": []

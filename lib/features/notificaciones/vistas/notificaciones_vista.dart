@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../compartidos/tema/colores_app.dart';
 import '../servicios/notificaciones_servicio.dart';
 import '../modelos/notificacion.dart';
+import '../../administracion/modelos/estudiante_info.dart';
+import '../../administracion/vistas/perfil_estudiante_vista.dart';
+import '../../evaluaciones/modelos/pregunta_beck.dart';
 
 /// Vista de notificaciones para psicólogos/administradores
 class NotificacionesVista extends StatefulWidget {
   final String psicologoId;
+  final String? psicologoNombre;
 
   const NotificacionesVista({
     super.key,
     required this.psicologoId,
+    this.psicologoNombre,
   });
 
   @override
@@ -19,6 +25,12 @@ class NotificacionesVista extends StatefulWidget {
 class _NotificacionesVistaState extends State<NotificacionesVista> {
   final NotificacionesServicio _servicio = NotificacionesServicio();
   bool _soloNoLeidas = false;
+
+  @override
+  void initState() {
+    super.initState();
+    print('🔍 NotificacionesVista - psicologoId: ${widget.psicologoId}');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +45,41 @@ class _NotificacionesVistaState extends State<NotificacionesVista> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(
-                    _soloNoLeidas ? 'Notificaciones no leídas' : 'Todas las notificaciones',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: ColoresApp.textoOscuro,
-                    ),
+                  child: StreamBuilder<int>(
+                    stream: _servicio.streamContadorNoLeidas(widget.psicologoId),
+                    builder: (context, snapshot) {
+                      final contador = snapshot.data ?? 0;
+                      return Row(
+                        children: [
+                          Text(
+                            _soloNoLeidas ? 'Notificaciones no leídas' : 'Todas las notificaciones',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: ColoresApp.textoOscuro,
+                            ),
+                          ),
+                          if (contador > 0) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: ColoresApp.primario,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$contador',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                 ),
                 // Toggle para filtrar no leídas
@@ -178,46 +218,96 @@ class _NotificacionesVistaState extends State<NotificacionesVista> {
 
     // Si tiene estudiante asociado, abrir su perfil
     if (notificacion.estudianteId != null && mounted) {
-      // Aquí podrías navegar al perfil del estudiante
-      // Por ahora solo mostramos un diálogo con detalles
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(notificacion.titulo),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(notificacion.mensaje.split('|tipo:')[0]), // Eliminar metadata del tipo
-                if (notificacion.estudianteNombre != null) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Estudiante: ${notificacion.estudianteNombre}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-                if (notificacion.nivelAnsiedad != null) ...[
-                  const SizedBox(height: 4),
-                  Text('Nivel: ${notificacion.nivelAnsiedad}'),
-                ],
-                if (notificacion.puntajeTest != null) ...[
-                  const SizedBox(height: 4),
-                  Text('Puntaje: ${notificacion.puntajeTest}/63'),
-                ],
-              ],
+      try {
+        // Mostrar loading
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(ColoresApp.primario),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cerrar'),
+        );
+
+        // Obtener información completa del estudiante desde Firestore
+        final estudianteDoc = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(notificacion.estudianteId)
+            .get();
+
+        if (!mounted) return;
+
+        // Cerrar loading
+        Navigator.of(context).pop();
+
+        if (estudianteDoc.exists) {
+          final data = estudianteDoc.data()!;
+
+          // Crear objeto EstudianteInfo
+          final estudiante = EstudianteInfo(
+            uid: notificacion.estudianteId!,
+            codigo: data['codigo'] as String? ?? '',
+            email: data['email'] as String? ?? '',
+            nombres: data['nombres'] as String? ?? '',
+            apellidos: data['apellidos'] as String? ?? '',
+            nombreCompleto: data['nombreCompleto'] as String? ?? 'Estudiante',
+            facultad: data['facultad'] as String?,
+            programa: data['programa'] as String?,
+            rol: data['rol'] as String? ?? 'estudiante',
+            fechaRegistro: data['fechaRegistro'] != null
+                ? (data['fechaRegistro'] as Timestamp).toDate()
+                : DateTime.now(),
+            ultimoNivelAnsiedad: data['ultimoNivelAnsiedad'] != null
+                ? NivelAnsiedad.values.firstWhere(
+                    (e) => e.name == data['ultimoNivelAnsiedad'],
+                    orElse: () => NivelAnsiedad.minima,
+                  )
+                : null,
+            fechaUltimoTest: data['fechaUltimoTest'] != null
+                ? (data['fechaUltimoTest'] as Timestamp).toDate()
+                : null,
+            puntajeUltimoTest: data['puntajeUltimoTest'] as int?,
+            requiereAtencion: data['requiereAtencion'] as bool? ?? false,
+            totalTests: data['totalTests'] as int? ?? 0,
+          );
+
+          // Navegar al perfil del estudiante
+          if (mounted) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => PerfilEstudianteVista(
+                  estudiante: estudiante,
+                  psicologoId: widget.psicologoId,
+                  psicologoNombre: widget.psicologoNombre ?? 'Psicólogo',
+                ),
+              ),
+            );
+          }
+        } else {
+          // Si no existe el estudiante, mostrar error
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No se pudo encontrar la información del estudiante'),
+                backgroundColor: ColoresApp.error,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          // Cerrar loading si está abierto
+          Navigator.of(context).pop();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al abrir perfil: $e'),
+              backgroundColor: ColoresApp.error,
             ),
-          ],
-        ),
-      );
+          );
+        }
+      }
     }
   }
 

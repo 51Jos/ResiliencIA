@@ -50,12 +50,13 @@ class EstudianteInfo {
       apellidos: data['apellidos'] as String? ?? '',
       nombreCompleto: data['nombreCompleto'] as String? ?? '',
       facultad: data['facultad'] as String?,
-      programa: data['programa'] as String?,
+      programa: data['carrera'] as String?,
       rol: data['rol'] as String? ?? 'estudiante',
       fechaRegistro: (data['fechaRegistro'] as Timestamp).toDate(),
       ultimoNivelAnsiedad: data['ultimoNivelAnsiedad'] != null
           ? NivelAnsiedad.values.firstWhere(
               (e) => e.name == data['ultimoNivelAnsiedad'],
+              orElse: () => NivelAnsiedad.minima, // Valor por defecto si no encuentra
             )
           : null,
       fechaUltimoTest: data['fechaUltimoTest'] != null
