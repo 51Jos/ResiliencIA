@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../compartidos/tema/colores_app.dart';
 import '../../compartidos/componentes/navegacion/barra_navegacion_estudiante.dart';
+import '../../compartidos/componentes/mensajes/mensaje_motivacional_flotante.dart';
 import '../autenticacion/controladores/auth_controlador.dart';
 import '../evaluaciones/servicios/test_servicio.dart';
 import '../evaluaciones/modelos/resultado_test.dart';
@@ -74,9 +75,32 @@ class _HomeVistaState extends State<HomeVista> {
         _ultimoTest = test;
         _cargando = false;
       });
+
+      // Mostrar mensaje motivacional si tiene ansiedad mínima
+      if (test != null &&
+          test.nivelAnsiedad == NivelAnsiedad.minima &&
+          test.actividadesRecomendadas.isNotEmpty) {
+        // Esperar un momento para que la UI se cargue
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          _mostrarMensajeMotivacional(test.actividadesRecomendadas.first);
+        }
+      }
     } else {
       setState(() => _cargando = false);
     }
+  }
+
+  void _mostrarMensajeMotivacional(String mensaje) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      builder: (context) => MensajeMotivacionalFlotante(
+        mensaje: mensaje,
+        onCerrar: () => Navigator.of(context).pop(),
+      ),
+    );
   }
 
   Color _getColorNivel(NivelAnsiedad nivel) {
