@@ -185,6 +185,100 @@ class AuthServicio {
     }
   }
 
+  /// Actualiza el nombre y apellido del usuario
+  Future<ResultadoAuth> actualizarNombreApellido({
+    required String uid,
+    required String nombres,
+    required String apellidos,
+  }) async {
+    try {
+      final nombreCompleto = '$nombres $apellidos';
+
+      // Actualizar en Firebase Auth
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.updateDisplayName(nombreCompleto);
+      }
+
+      // Actualizar en Firestore
+      await _firestore.collection('usuarios').doc(uid).update({
+        'nombres': nombres,
+        'apellidos': apellidos,
+        'nombreCompleto': nombreCompleto,
+      });
+
+      return ResultadoAuth(
+        exito: true,
+        mensaje: 'Perfil actualizado correctamente',
+      );
+    } catch (e) {
+      return ResultadoAuth(
+        exito: false,
+        mensaje: 'Error al actualizar perfil: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Cambia la contraseña del usuario
+  Future<ResultadoAuth> cambiarContrasena({
+    required String contrasenaActual,
+    required String contrasenaNueva,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null || user.email == null) {
+        return ResultadoAuth(
+          exito: false,
+          mensaje: 'No hay usuario autenticado',
+        );
+      }
+
+      // Re-autenticar al usuario con su contraseña actual
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: contrasenaActual,
+      );
+
+      try {
+        await user.reauthenticateWithCredential(credential);
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+          return ResultadoAuth(
+            exito: false,
+            mensaje: 'La contraseña actual es incorrecta',
+          );
+        }
+        rethrow;
+      }
+
+      // Validar que la nueva contraseña tenga al menos 6 caracteres
+      if (contrasenaNueva.length < 6) {
+        return ResultadoAuth(
+          exito: false,
+          mensaje: 'La nueva contraseña debe tener al menos 6 caracteres',
+        );
+      }
+
+      // Actualizar la contraseña
+      await user.updatePassword(contrasenaNueva);
+
+      return ResultadoAuth(
+        exito: true,
+        mensaje: 'Contraseña actualizada correctamente',
+      );
+    } on FirebaseAuthException catch (e) {
+      return ResultadoAuth(
+        exito: false,
+        mensaje: _manejarErrorAuth(e),
+      );
+    } catch (e) {
+      return ResultadoAuth(
+        exito: false,
+        mensaje: 'Error al cambiar contraseña: ${e.toString()}',
+      );
+    }
+  }
+
   /// Maneja errores de Firebase Auth
   String _manejarErrorAuth(FirebaseAuthException e) {
     switch (e.code) {

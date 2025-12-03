@@ -85,6 +85,48 @@ class AuthControlador extends ChangeNotifier {
     return await _authServicio.obtenerDatosUsuario(usuarioActual!.uid);
   }
 
+  /// Actualiza el nombre y apellido del usuario
+  Future<ResultadoAuth> actualizarNombreApellido({
+    required String nombres,
+    required String apellidos,
+  }) async {
+    if (usuarioActual == null) {
+      return ResultadoAuth(
+        exito: false,
+        mensaje: 'No hay usuario autenticado',
+      );
+    }
+
+    _setCargando(true);
+    final resultado = await _authServicio.actualizarNombreApellido(
+      uid: usuarioActual!.uid,
+      nombres: nombres,
+      apellidos: apellidos,
+    );
+    _setCargando(false);
+
+    // Notificar a los listeners para actualizar la UI
+    if (resultado.exito) {
+      notifyListeners();
+    }
+
+    return resultado;
+  }
+
+  /// Cambia la contraseña del usuario
+  Future<ResultadoAuth> cambiarContrasena({
+    required String contrasenaActual,
+    required String contrasenaNueva,
+  }) async {
+    _setCargando(true);
+    final resultado = await _authServicio.cambiarContrasena(
+      contrasenaActual: contrasenaActual,
+      contrasenaNueva: contrasenaNueva,
+    );
+    _setCargando(false);
+    return resultado;
+  }
+
   /// Actualiza el estado de carga
   void _setCargando(bool valor) {
     _cargando = valor;

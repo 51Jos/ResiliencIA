@@ -451,6 +451,13 @@ class _HomeVistaState extends State<HomeVista> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/perfil');
+            },
+            tooltip: 'Mi perfil',
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await authControlador.cerrarSesion();
