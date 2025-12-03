@@ -268,9 +268,9 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
               if (valor == null || valor.isEmpty) {
                 return 'El correo es requerido';
               }
-              // Acepta tanto @ucss.pe como @ucss.edu.pe
-              if (!valor.endsWith('@ucss.pe') && !valor.endsWith('@ucss.edu.pe')) {
-                return 'Debe ser un correo institucional UCSS (@ucss.pe o @ucss.edu.pe)';
+              // Solo acepta @ucss.pe para registro
+              if (!valor.endsWith('@ucss.pe')) {
+                return 'Debe ser un correo institucional UCSS (@ucss.pe)';
               }
               // Validar que el código tenga exactamente 10 dígitos antes del @
               final codigo = valor.split('@')[0];
