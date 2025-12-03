@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../compartidos/tema/colores_app.dart';
 import '../../../compartidos/componentes/modales/modal_mensaje.dart';
+import '../../../compartidos/componentes/navegacion/barra_navegacion_estudiante.dart';
 import '../../autenticacion/controladores/auth_controlador.dart';
 
 /// Vista de perfil del estudiante
@@ -151,6 +152,7 @@ class _PerfilEstudianteState extends State<PerfilEstudiante> {
         backgroundColor: ColoresApp.primario,
         foregroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -175,6 +177,7 @@ class _PerfilEstudianteState extends State<PerfilEstudiante> {
           ],
         ),
       ),
+      bottomNavigationBar: const BarraNavegacionEstudiante(indiceActual: 1),
     );
   }
 

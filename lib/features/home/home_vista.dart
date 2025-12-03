@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../compartidos/tema/colores_app.dart';
+import '../../compartidos/componentes/navegacion/barra_navegacion_estudiante.dart';
 import '../autenticacion/controladores/auth_controlador.dart';
 import '../evaluaciones/servicios/test_servicio.dart';
 import '../evaluaciones/modelos/resultado_test.dart';
@@ -449,14 +450,8 @@ class _HomeVistaState extends State<HomeVista> {
         backgroundColor: ColoresApp.primario,
         foregroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/perfil');
-            },
-            tooltip: 'Mi perfil',
-          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -789,6 +784,7 @@ class _HomeVistaState extends State<HomeVista> {
           ],
         ),
       ),
+      bottomNavigationBar: const BarraNavegacionEstudiante(indiceActual: 0),
     );
   }
 
