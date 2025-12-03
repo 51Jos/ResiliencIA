@@ -244,18 +244,21 @@ class TestServicio {
     // Construye las actividades recomendadas con los mensajes del sistema experto
     final actividades = <String>[];
 
-    // Agrega mensaje principal si existe
-    if (analisis.mensajePrincipal.isNotEmpty) {
-      actividades.add(analisis.mensajePrincipal);
-    }
+    // Agregar todos los mensajes del análisis
+    actividades.addAll(analisis.mensajes);
 
-    // Agrega mensaje de tipo si existe
-    if (analisis.mensajeTipo.isNotEmpty) {
-      actividades.add(analisis.mensajeTipo);
+    // Construir mensaje de derivación si es necesario
+    String? mensajeDerivacion;
+    if (analisis.requiereDerivacion) {
+      mensajeDerivacion = [
+        analisis.tituloDerivacion ?? '',
+        '',
+        analisis.cuerpoDerivacion ?? '',
+        '',
+        analisis.accionDerivacion ?? '',
+        analisis.datosContactoDerivacion ?? '',
+      ].where((s) => s.isNotEmpty).join('\n');
     }
-
-    // Agrega las recomendaciones personalizadas
-    actividades.addAll(analisis.recomendacionesPersonalizadas);
 
     // Crea el resultado
     return ResultadoTest(
@@ -271,7 +274,7 @@ class TestServicio {
       fechaDerivacion: analisis.requiereDerivacion
           ? DateTime.now()
           : null,
-      observaciones: analisis.mensajeDerivacion,
+      observaciones: mensajeDerivacion,
     );
   }
 

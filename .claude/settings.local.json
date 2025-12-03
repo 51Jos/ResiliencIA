@@ -34,7 +34,8 @@
       "Bash(firebase login:*)",
       "Bash(flutter logs:*)",
       "Bash(copy:*)",
-      "Bash(nc:*)"
+      "Bash(nc:*)",
+      "Bash(del \"d:\\ProyectosApps\\Richard\\Diagnostic\\resiliencia\\lib\\banco_recomendaciones.json\")"
     ],
     "deny": [],
     "ask": []
