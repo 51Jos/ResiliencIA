@@ -260,8 +260,8 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
           // Campo de correo universitario
           _buildTextField(
             controller: _correoController,
-            label: 'Correo Universitario',
-            hint: 'ejemplo@ucss.pe',
+            label: 'Correo Universitario (10 dígitos)',
+            hint: '2024001234@ucss.pe',
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (valor) {
@@ -271,6 +271,15 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
               // Acepta tanto @ucss.pe como @ucss.edu.pe
               if (!valor.endsWith('@ucss.pe') && !valor.endsWith('@ucss.edu.pe')) {
                 return 'Debe ser un correo institucional UCSS (@ucss.pe o @ucss.edu.pe)';
+              }
+              // Validar que el código tenga exactamente 10 dígitos antes del @
+              final codigo = valor.split('@')[0];
+              if (codigo.length != 10) {
+                return 'El código debe tener exactamente 10 dígitos';
+              }
+              // Verificar que todos sean números
+              if (!RegExp(r'^\d{10}$').hasMatch(codigo)) {
+                return 'El código debe contener solo números';
               }
               return null;
             },
