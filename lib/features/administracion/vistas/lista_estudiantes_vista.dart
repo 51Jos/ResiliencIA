@@ -326,28 +326,59 @@ class _ListaEstudiantesVistaState extends State<ListaEstudiantesVista> {
       onRefresh: () async {
         await controlador.cargarEstudiantes();
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: controlador.estudiantes.length,
-        itemBuilder: (context, index) {
-          final estudiante = controlador.estudiantes[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: TarjetaEstudiante(
-              estudiante: estudiante,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PerfilEstudianteVista(
-                      estudiante: estudiante,
-                      psicologoId: widget.psicologoId,
-                      psicologoNombre: widget.psicologoNombre,
-                    ),
-                  ),
-                );
-              },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Calcular número de columnas según el ancho disponible
+          final anchoPantalla = constraints.maxWidth;
+          int columnas;
+          double espaciado;
+
+          if (anchoPantalla >= 1400) {
+            // Pantallas muy grandes (desktop): 4 columnas
+            columnas = 4;
+            espaciado = 20;
+          } else if (anchoPantalla >= 1100) {
+            // Pantallas grandes (desktop): 3 columnas
+            columnas = 3;
+            espaciado = 18;
+          } else if (anchoPantalla >= 768) {
+            // Tablets: 2 columnas
+            columnas = 2;
+            espaciado = 16;
+          } else {
+            // Móviles: 1 columna
+            columnas = 1;
+            espaciado = 16;
+          }
+
+          return GridView.builder(
+            padding: EdgeInsets.all(espaciado),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columnas,
+              crossAxisSpacing: espaciado,
+              mainAxisSpacing: espaciado,
+              // Ajustar ratio según el contenido de las tarjetas
+              childAspectRatio: columnas == 1 ? 3.5 : 2.8,
             ),
+            itemCount: controlador.estudiantes.length,
+            itemBuilder: (context, index) {
+              final estudiante = controlador.estudiantes[index];
+              return TarjetaEstudiante(
+                estudiante: estudiante,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PerfilEstudianteVista(
+                        estudiante: estudiante,
+                        psicologoId: widget.psicologoId,
+                        psicologoNombre: widget.psicologoNombre,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           );
         },
       ),
