@@ -1,8 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../compartidos/tema/colores_app.dart';
+import '../../../compartidos/componentes/modales/modal_mensaje.dart';
 import '../componentes/barra_navegacion_admin.dart';
 import '../controladores/administracion_controlador.dart';
+import '../servicios/exportacion_servicio.dart';
 import 'lista_estudiantes_vista.dart';
 import 'estadisticas_vista.dart';
 import '../../notificaciones/vistas/notificaciones_vista.dart';
@@ -60,6 +65,19 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // Botón de exportar (solo visible en vista de estudiantes)
+          if (_indiceActual == 0)
+            Consumer<AdministracionControlador>(
+              builder: (context, controlador, _) {
+                return IconButton(
+                  icon: const Icon(Icons.file_download_outlined),
+                  tooltip: 'Exportar a Excel',
+                  onPressed: controlador.estudiantes.isEmpty
+                      ? null
+                      : () => _exportarAExcel(context, controlador),
+                );
+              },
+            ),
           // Información del usuario
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -194,6 +212,97 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
         ],
       ),
     );
+  }
+
+  /// Exporta la lista de estudiantes a Excel
+  Future<void> _exportarAExcel(
+    BuildContext context,
+    AdministracionControlador controlador,
+  ) async {
+    // Mostrar diálogo de carga
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(ColoresApp.primario),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Generando archivo Excel...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: ColoresApp.textoOscuro,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final servicio = ExportacionServicio();
+      final resultado = await servicio.exportarEstudiantesAExcel(
+        estudiantes: controlador.estudiantes,
+      );
+
+      // Cerrar diálogo de carga
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      if (kIsWeb) {
+        // En web, se descarga automáticamente
+        if (context.mounted) {
+          await ModalMensaje.mostrarExito(
+            context: context,
+            titulo: 'Exportación exitosa',
+            mensaje: 'Se ha descargado el archivo Excel con ${controlador.estudiantes.length} estudiante${controlador.estudiantes.length != 1 ? 's' : ''}.',
+          );
+        }
+      } else {
+        // En móvil/desktop, compartir el archivo
+        final filePath = resultado as String;
+        final file = File(filePath);
+
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          subject: 'Datos de Estudiantes',
+          text: 'Exportación de ${controlador.estudiantes.length} estudiante${controlador.estudiantes.length != 1 ? 's' : ''}',
+        );
+
+        if (context.mounted) {
+          await ModalMensaje.mostrarExito(
+            context: context,
+            titulo: 'Exportación exitosa',
+            mensaje: 'Se ha exportado el archivo Excel con ${controlador.estudiantes.length} estudiante${controlador.estudiantes.length != 1 ? 's' : ''}.',
+          );
+        }
+      }
+    } catch (e) {
+      // Cerrar diálogo de carga si está abierto
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // Mostrar error
+      if (context.mounted) {
+        await ModalMensaje.mostrarError(
+          context: context,
+          titulo: 'Error al exportar',
+          mensaje: 'No se pudo generar el archivo Excel. Por favor, intenta nuevamente.',
+        );
+      }
+    }
   }
 }
 

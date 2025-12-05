@@ -287,6 +287,7 @@ class _InfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icono,
@@ -301,7 +302,7 @@ class _InfoItem extends StatelessWidget {
               fontSize: 13,
               color: ColoresApp.textoMedio,
             ),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
