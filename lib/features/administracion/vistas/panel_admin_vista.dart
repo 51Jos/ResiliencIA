@@ -139,8 +139,6 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
         return 'Estadísticas';
       case 2:
         return 'Notificaciones';
-      case 3:
-        return 'Configuración';
       default:
         return 'Panel de Administración';
     }
@@ -166,9 +164,6 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
           psicologoId: widget.psicologoId,
           psicologoNombre: widget.psicologoNombre,
         );
-      case 3:
-        // Vista de configuración (placeholder)
-        return const _ConfiguracionVista();
       default:
         return const Center(child: Text('Vista no encontrada'));
     }
@@ -272,43 +267,3 @@ class _ContenidoEstadisticasState extends State<_ContenidoEstadisticas> {
   }
 }
 
-/// Vista de configuración (placeholder por ahora)
-class _ConfiguracionVista extends StatelessWidget {
-  const _ConfiguracionVista();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: ColoresApp.fondoPrincipal,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.settings_outlined,
-              size: 80,
-              color: ColoresApp.textoMedio.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Configuración',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: ColoresApp.textoMedio.withValues(alpha: 0.5),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Próximamente...',
-              style: TextStyle(
-                fontSize: 14,
-                color: ColoresApp.textoMedio.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

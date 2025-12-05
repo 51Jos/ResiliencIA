@@ -80,11 +80,6 @@ class BarraNavegacionAdmin extends StatelessWidget {
         selectedIcon: _buildIconoNotificaciones(true),
         label: const Text('Notificaciones'),
       ),
-      const NavigationRailDestination(
-        icon: Icon(Icons.settings_outlined),
-        selectedIcon: Icon(Icons.settings),
-        label: Text('Configuración'),
-      ),
     ];
   }
 
@@ -105,11 +100,6 @@ class BarraNavegacionAdmin extends StatelessWidget {
         icon: _buildIconoNotificaciones(false),
         activeIcon: _buildIconoNotificaciones(true),
         label: 'Notificaciones',
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.settings_outlined),
-        activeIcon: Icon(Icons.settings),
-        label: 'Configuración',
       ),
     ];
   }
