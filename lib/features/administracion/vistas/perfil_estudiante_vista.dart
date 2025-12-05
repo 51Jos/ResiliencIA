@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:html' as html;
+import 'package:url_launcher/url_launcher.dart';
 import '../../../compartidos/tema/colores_app.dart';
 import '../../../compartidos/componentes/campos/campo_textarea.dart';
 import '../controladores/administracion_controlador.dart';
@@ -301,9 +301,12 @@ class _PerfilEstudianteVistaState extends State<PerfilEstudianteVista> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton.icon(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              html.window.open('https://citaspsicologia.globeapp.dev', '_blank');
+              final url = Uri.parse('https://citaspsicologia.globeapp.dev');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ColoresApp.primario,
