@@ -198,14 +198,17 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
     // Muestra el resultado
     if (mounted) {
       if (resultado.exito) {
-        // Muestra modal de éxito
+        // Muestra modal de éxito y redirige al home automáticamente
         await ModalMensaje.mostrarExito(
           context: context,
-          titulo: 'Cuenta Creada',
-          mensaje: 'Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión con tu correo y contraseña.',
+          titulo: '¡Bienvenido!',
+          mensaje: 'Tu cuenta ha sido creada exitosamente. Ya puedes comenzar a usar la aplicación.',
           alCerrar: () {
-            // Navega al login
-            Navigator.of(context).pop();
+            // Redirigir directamente al home (el usuario ya está autenticado)
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/home',
+              (route) => false,
+            );
           },
         );
       } else {
