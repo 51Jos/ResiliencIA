@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Sistema de Psicología - UCSS',
+        title: 'Sistema de Diagnostico de la Ansiedad - UCSS',
         debugShowCheckedModeBanner: false,
         theme: TemaApp.temaClaro,
         initialRoute: RutasApp.rutaInicial,
