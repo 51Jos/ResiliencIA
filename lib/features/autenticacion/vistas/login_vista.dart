@@ -54,10 +54,6 @@ class LoginVista extends StatelessWidget {
 
                       // Tarjeta informativa
                       LoginTarjetaInfo(),
-                      SizedBox(height: 30),
-
-                      // Pie de página
-                      LoginPiePagina(),
                     ],
                   ),
                 ),

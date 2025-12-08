@@ -4,6 +4,7 @@ import '../../controladores/auth_controlador.dart';
 import 'usuario_campo.dart';
 import 'password_campo.dart';
 import 'login_boton.dart';
+import 'recuperar_password_dialogo.dart';
 import '../../../../compartidos/tema/colores_app.dart';
 import '../../../evaluaciones/servicios/test_servicio.dart';
 import '../../../evaluaciones/vistas/test_ansiedad_vista.dart';
@@ -190,6 +191,29 @@ class _LoginFormularioState extends State<LoginFormulario> {
 
           // Campo de contraseña
           PasswordCampo(controlador: _passwordController),
+          const SizedBox(height: 12),
+
+          // Link de recuperar contraseña
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () {
+                // Mostrar modal de recuperar contraseña
+                showDialog(
+                  context: context,
+                  builder: (context) => const RecuperarPasswordDialogo(),
+                );
+              },
+              child: const Text(
+                '¿Olvidaste tu contraseña?',
+                style: TextStyle(
+                  color: ColoresApp.primario,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 28),
 
           // Botón de login
