@@ -20,6 +20,9 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // GlobalKey para navegación desde servicios (notificaciones)
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -32,6 +35,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'Sistema de Diagnostico de la Ansiedad - UCSS',
         debugShowCheckedModeBanner: false,
         theme: TemaApp.temaClaro,

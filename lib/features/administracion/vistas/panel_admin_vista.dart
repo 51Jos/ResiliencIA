@@ -12,6 +12,8 @@ import 'lista_estudiantes_vista.dart';
 import 'estadisticas_vista.dart';
 import '../../notificaciones/vistas/notificaciones_vista.dart';
 import '../../notificaciones/servicios/listener_notificaciones_servicio.dart';
+import '../../notificaciones/servicios/notificaciones_locales_servicio.dart';
+import '../../../main.dart';
 
 /// Panel principal de administración con navegación integrada
 /// Punto de entrada para administradores/psicólogos
@@ -38,6 +40,14 @@ class _PanelAdminVistaState extends State<PanelAdminVista> {
   @override
   void initState() {
     super.initState();
+
+    // Configurar navegación para notificaciones locales
+    NotificacionesLocalesServicio().configurarNavegacion(
+      navigatorKey: MyApp.navigatorKey,
+      psicologoId: widget.psicologoId,
+      psicologoNombre: widget.psicologoNombre,
+    );
+
     // Iniciar listener de notificaciones en tiempo real
     _listenerNotificaciones.iniciarListener(widget.psicologoId);
   }

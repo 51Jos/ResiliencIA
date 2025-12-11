@@ -1,5 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../compartidos/tema/colores_app.dart';
+import '../../administracion/modelos/estudiante_info.dart';
+import '../../administracion/vistas/perfil_estudiante_vista.dart';
+
 /// Servicio para gestionar notificaciones push locales
 /// Se usa para alertar al psicólogo cuando hay un test grave/severo
 class NotificacionesLocalesServicio {
@@ -9,6 +14,22 @@ class NotificacionesLocalesServicio {
 
   final FlutterLocalNotificationsPlugin _notificaciones = FlutterLocalNotificationsPlugin();
   bool _inicializado = false;
+
+  // NavigatorKey para poder navegar desde el servicio
+  GlobalKey<NavigatorState>? _navigatorKey;
+  String? _psicologoId;
+  String? _psicologoNombre;
+
+  /// Configura el NavigatorKey y datos del psicólogo
+  void configurarNavegacion({
+    required GlobalKey<NavigatorState> navigatorKey,
+    required String psicologoId,
+    required String psicologoNombre,
+  }) {
+    _navigatorKey = navigatorKey;
+    _psicologoId = psicologoId;
+    _psicologoNombre = psicologoNombre;
+  }
 
   /// Inicializa el servicio de notificaciones locales
   Future<void> inicializar() async {
@@ -59,9 +80,117 @@ class NotificacionesLocalesServicio {
   }
 
   /// Callback cuando el usuario toca una notificación
-  void _onNotificationTap(NotificationResponse response) {
-    // Aquí podrías navegar a la vista de notificaciones
-    // o a los detalles del estudiante
+  void _onNotificationTap(NotificationResponse response) async {
+    // Verificar que tengamos el payload con el estudianteId
+    if (response.payload == null || response.payload!.isEmpty) return;
+
+    // Verificar que tengamos el NavigatorKey configurado
+    if (_navigatorKey == null || _navigatorKey!.currentContext == null) {
+      print('⚠️ NavigatorKey no configurado o sin contexto');
+      return;
+    }
+
+    final BuildContext? context = _navigatorKey!.currentContext;
+    if (context == null) return;
+
+    try {
+      final estudianteId = response.payload!;
+
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Obtener datos del estudiante desde Firestore
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(estudianteId)
+          .get();
+
+      // Cerrar loading
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data()!;
+        final estudiante = EstudianteInfo(
+          uid: docSnapshot.id,
+          codigo: data['codigo'] as String? ?? '',
+          email: data['email'] as String,
+          nombres: data['nombres'] as String? ?? '',
+          apellidos: data['apellidos'] as String? ?? '',
+          nombreCompleto: data['nombreCompleto'] as String? ?? '',
+          facultad: data['facultad'] as String?,
+          programa: data['carrera'] as String?,
+          rol: data['rol'] as String? ?? 'estudiante',
+          fechaRegistro: (data['fechaRegistro'] as Timestamp).toDate(),
+          ultimoNivelAnsiedad: data['ultimoNivelAnsiedad'] != null
+              ? _parseNivelAnsiedad(data['ultimoNivelAnsiedad'])
+              : null,
+          fechaUltimoTest: data['fechaUltimoTest'] != null
+              ? (data['fechaUltimoTest'] as Timestamp).toDate()
+              : null,
+          puntajeUltimoTest: data['puntajeUltimoTest'] as int?,
+          requiereAtencion: data['requiereAtencion'] as bool? ?? false,
+          totalTests: data['totalTests'] as int? ?? 0,
+        );
+
+        // Navegar al perfil del estudiante
+        if (context.mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PerfilEstudianteVista(
+                estudiante: estudiante,
+                psicologoId: _psicologoId ?? '',
+                psicologoNombre: _psicologoNombre ?? 'Psicólogo',
+              ),
+            ),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No se pudo encontrar la información del estudiante'),
+              backgroundColor: ColoresApp.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error al navegar desde notificación: $e');
+      if (context.mounted) {
+        // Cerrar loading si está abierto
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al abrir perfil: $e'),
+            backgroundColor: ColoresApp.error,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Helper para parsear el nivel de ansiedad
+  dynamic _parseNivelAnsiedad(dynamic value) {
+    try {
+      // Los valores posibles del enum NivelAnsiedad
+      final niveles = ['minima', 'leve', 'moderada', 'moderadaGrave', 'severa'];
+      if (niveles.contains(value)) {
+        // Retornar el valor sin conversión ya que EstudianteInfo.fromFirestore lo maneja
+        return value;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Muestra una notificación de ansiedad grave/severa
@@ -69,6 +198,7 @@ class NotificacionesLocalesServicio {
     required String estudianteNombre,
     required String nivelAnsiedad,
     required int puntaje,
+    String? estudianteId,
   }) async {
     if (!_inicializado) {
       await inicializar();
@@ -111,7 +241,7 @@ class NotificacionesLocalesServicio {
       titulo,
       mensaje,
       details,
-      payload: 'ansiedad_grave', // Datos para el callback
+      payload: estudianteId, // ID del estudiante para navegar a su perfil
     );
   }
 

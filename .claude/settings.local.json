@@ -35,7 +35,8 @@
       "Bash(flutter logs:*)",
       "Bash(copy:*)",
       "Bash(nc:*)",
-      "Bash(del \"d:\\ProyectosApps\\Richard\\Diagnostic\\resiliencia\\lib\\banco_recomendaciones.json\")"
+      "Bash(del \"d:\\ProyectosApps\\Richard\\Diagnostic\\resiliencia\\lib\\banco_recomendaciones.json\")",
+      "Bash(del \"d:\\ProyectosApps\\Richard\\Diagnostic\\resiliencia\\lib\\features\\autenticacion\\vistas\\recuperar_password_vista.dart\")"
     ],
     "deny": [],
     "ask": []

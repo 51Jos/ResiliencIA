@@ -151,7 +151,6 @@ class TestServicio {
     if (resultado.nivelAnsiedad == NivelAnsiedad.moderada ||
         resultado.nivelAnsiedad == NivelAnsiedad.moderadaGrave ||
         resultado.nivelAnsiedad == NivelAnsiedad.severa) {
-      print('🚨 Nivel de ansiedad grave detectado: ${resultado.nivelAnsiedad.name}');
 
       // Obtener nombre del estudiante desde Firestore
       final usuarioDoc = await _firestore
@@ -162,18 +161,13 @@ class TestServicio {
       if (usuarioDoc.exists) {
         final nombreCompleto = usuarioDoc.data()?['nombreCompleto'] as String? ?? 'Estudiante';
 
-        print('👤 Creando notificación para: $nombreCompleto');
         final notifId = await _notificacionesServicio.crearAlertaAnsiedadGrave(
           estudianteId: resultado.usuarioId,
           estudianteNombre: nombreCompleto,
           nivelAnsiedad: resultado.nivelAnsiedad,
           puntajeTest: resultado.puntajeTotal,
         );
-
-        print('✅ Notificación creada con ID: $notifId');
-        print('📱 Las notificaciones push las enviará el ListenerNotificacionesServicio');
       } else {
-        print('❌ Usuario no encontrado: ${resultado.usuarioId}');
       }
     }
 

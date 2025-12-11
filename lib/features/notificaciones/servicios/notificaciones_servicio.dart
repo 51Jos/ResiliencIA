@@ -97,7 +97,6 @@ class NotificacionesServicio {
     String psicologoId, {
     bool soloNoLeidas = false,
   }) {
-    print('🔍 streamNotificaciones - psicologoId: $psicologoId, soloNoLeidas: $soloNoLeidas');
 
     Query<Map<String, dynamic>> query = _firestore
         .collection('notificaciones')
@@ -112,16 +111,10 @@ class NotificacionesServicio {
     }
 
     return query.snapshots().map((snapshot) {
-      print('📦 Stream recibió ${snapshot.docs.length} notificaciones');
 
       final notificaciones = snapshot.docs
           .map((doc) => Notificacion.fromFirestore(doc))
-          .toList();
-
-      print('✅ Notificaciones parseadas: ${notificaciones.length}');
-      for (var notif in notificaciones) {
-        print('   - ${notif.titulo} (${notif.leida ? "leída" : "no leída"})');
-      }
+          .toList();      
 
       return notificaciones;
     });
@@ -129,7 +122,6 @@ class NotificacionesServicio {
 
   /// Stream del conteo de notificaciones no leídas
   Stream<int> streamContadorNoLeidas(String psicologoId) {
-    print('🔍 streamContadorNoLeidas - psicologoId: $psicologoId');
 
     return _firestore
         .collection('notificaciones')
@@ -138,7 +130,6 @@ class NotificacionesServicio {
         .snapshots()
         .map((snapshot) {
           final contador = snapshot.docs.length;
-          print('🔢 Contador de no leídas: $contador');
           return contador;
         });
   }

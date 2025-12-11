@@ -72,12 +72,14 @@ class ListenerNotificacionesServicio {
       final estudianteNombre = notificacion.estudianteNombre ?? 'Estudiante';
       final nivelAnsiedad = notificacion.nivelAnsiedad ?? 'moderada';
       final puntaje = notificacion.puntajeTest ?? 0;
+      final estudianteId = notificacion.estudianteId;
 
       // Mostrar notificación push local
       await _notificacionesLocales.mostrarAlertaAnsiedadGrave(
         estudianteNombre: estudianteNombre,
         nivelAnsiedad: nivelAnsiedad,
         puntaje: puntaje,
+        estudianteId: estudianteId,
       );
 
       print('✅ Notificación push local mostrada');

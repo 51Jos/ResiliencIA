@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../features/splash/splash_vista.dart';
 import '../features/autenticacion/vistas/login_vista.dart';
 import '../features/autenticacion/vistas/registro_vista.dart';
+import '../features/autenticacion/vistas/intranet_vista.dart';
 import '../features/home/home_vista.dart';
 import '../features/perfil/vistas/perfil_estudiante.dart';
 
@@ -14,6 +15,7 @@ class RutasApp {
   static const String splash = '/';
   static const String login = '/login';
   static const String registro = '/registro';
+  static const String intranet = '/intranet';
   static const String home = '/home';
   static const String perfil = '/perfil';
 
@@ -28,6 +30,7 @@ class RutasApp {
       splash: (context) => const SplashVista(),
       login: (context) => const LoginVista(),
       registro: (context) => const RegistroVista(),
+      intranet: (context) => const LoginScreen(),
       home: (context) => const HomeVista(),
       perfil: (context) => const PerfilEstudiante(),
     };

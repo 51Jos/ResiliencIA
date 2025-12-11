@@ -7,10 +7,22 @@ import '../../../../compartidos/componentes/modales/modal_mensaje.dart';
 import '../../../../compartidos/tema/colores_app.dart';
 import '../../../legales/vistas/terminos_condiciones_vista.dart';
 import '../../../legales/vistas/politica_privacidad_vista.dart';
+import '../../../evaluaciones/vistas/test_ansiedad_vista.dart';
 
 /// Formulario de registro con validación UCSS
 class RegistroFormulario extends StatefulWidget {
-  const RegistroFormulario({super.key});
+  final String? codigo;
+  final String? nombres;
+  final String? apellidos;
+  final String? facultad;
+
+  const RegistroFormulario({
+    super.key,
+    this.codigo,
+    this.nombres,
+    this.apellidos,
+    this.facultad,
+  });
 
   @override
   State<RegistroFormulario> createState() => _RegistroFormularioState();
@@ -32,49 +44,82 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
 
   // Lista de facultades
   final List<String> _facultades = [
-    'Ingeniería',
-    'Ciencias de la Salud',
     'Ciencias Económicas y Comerciales',
+    'Ciencias de la Educación y Humanidades',
+    'Ciencias de la Salud',
+    'Ingeniería',
+    'Ciencias Agrarias y Ambientales',
     'Derecho y Ciencias Políticas',
-    'Educación',
-    'Comunicación',
   ];
 
   // Mapa de carreras por facultad
   final Map<String, List<String>> _carrerasPorFacultad = {
-    'Ingeniería': [
-      'Ingeniería de Sistemas',
-      'Ingeniería Industrial',
-      'Ingeniería Civil',
-      'Ingeniería Ambiental',
+    'Ciencias Económicas y Comerciales': [
+      'Administración y Negocios Internacionales',
+      'Contabilidad y Finanzas',
+    ],
+    'Ciencias de la Educación y Humanidades': [
+      'Educación Inicial',
     ],
     'Ciencias de la Salud': [
-      'Psicología',
       'Enfermería',
-      'Medicina Humana',
-      'Estomatología',
+      'Psicología',
     ],
-    'Ciencias Económicas y Comerciales': [
-      'Administración',
-      'Contabilidad',
-      'Economía',
-      'Marketing',
+    'Ingeniería': [
+      'Ingeniería Civil',
+      'Ingeniería de Sistemas',
+    ],
+    'Ciencias Agrarias y Ambientales': [
+      'Ingeniería Agraria con mención forestal',
+      'Ingeniería Ambiental',
     ],
     'Derecho y Ciencias Políticas': [
       'Derecho',
-      'Ciencias Políticas',
-    ],
-    'Educación': [
-      'Educación Inicial',
-      'Educación Primaria',
-      'Educación Secundaria',
-    ],
-    'Comunicación': [
-      'Comunicación Audiovisual',
-      'Periodismo',
-      'Publicidad',
     ],
   };
+
+  /// Mapea la facultad del scraping al valor correcto del dropdown
+  String? _mapearFacultad(String? facultadScraping) {
+    if (facultadScraping == null) return null;
+
+    final facultadLower = facultadScraping.toLowerCase().trim();
+
+    // Mapeo de facultades del scraping a los valores del dropdown
+    if (facultadLower.contains('económicas') || facultadLower.contains('economicas') || facultadLower.contains('comerciales')) {
+      return 'Ciencias Económicas y Comerciales';
+    } else if (facultadLower.contains('educación') || facultadLower.contains('educacion') || facultadLower.contains('humanidades')) {
+      return 'Ciencias de la Educación y Humanidades';
+    } else if (facultadLower.contains('salud')) {
+      return 'Ciencias de la Salud';
+    } else if (facultadLower.contains('ingeniería') || facultadLower.contains('ingenieria')) {
+      return 'Ingeniería';
+    } else if (facultadLower.contains('agrarias') || facultadLower.contains('ambientales')) {
+      return 'Ciencias Agrarias y Ambientales';
+    } else if (facultadLower.contains('derecho') || facultadLower.contains('políticas') || facultadLower.contains('politicas')) {
+      return 'Derecho y Ciencias Políticas';
+    }
+
+    // Si no coincide con ninguna, devolver null
+    return null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-llenar campos si se recibieron datos del scraping
+    if (widget.nombres != null) {
+      _nombresController.text = widget.nombres!;
+    }
+    if (widget.apellidos != null) {
+      _apellidosController.text = widget.apellidos!;
+    }
+    if (widget.codigo != null) {
+      _correoController.text = '${widget.codigo}@ucss.pe';
+    }
+    if (widget.facultad != null) {
+      _facultadSeleccionada = _mapearFacultad(widget.facultad);
+    }
+  }
 
   @override
   void dispose() {
@@ -198,16 +243,31 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
     // Muestra el resultado
     if (mounted) {
       if (resultado.exito) {
-        // Muestra modal de éxito y redirige al home automáticamente
+        // Obtiene el ID del usuario
+        final usuarioId = resultado.usuario?.uid;
+
+        if (usuarioId == null) {
+          // Error: no se pudo obtener el ID del usuario
+          await ModalMensaje.mostrarError(
+            context: context,
+            titulo: 'Error',
+            mensaje: 'No se pudo obtener la información del usuario.',
+          );
+          return;
+        }
+
+        // Muestra modal de éxito y redirige directamente al test
         await ModalMensaje.mostrarExito(
           context: context,
           titulo: '¡Bienvenido!',
-          mensaje: 'Tu cuenta ha sido creada exitosamente. Ya puedes comenzar a usar la aplicación.',
+          mensaje: 'Tu cuenta ha sido creada exitosamente. Ahora completa el test de resiliencia.',
           alCerrar: () {
-            // Redirigir directamente al home (el usuario ya está autenticado)
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/home',
-              (route) => false,
+            // Redirigir directamente al test (sin verificar si ya lo hizo, es cuenta nueva)
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TestAnsiedadVista(usuarioId: usuarioId),
+              ),
             );
           },
         );
@@ -236,6 +296,7 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
             label: 'Nombres',
             hint: 'Ingresa tus nombres',
             icon: Icons.person_outline,
+            enabled: widget.nombres == null, // Solo lectura si viene del scraping
             validator: (valor) {
               if (valor == null || valor.isEmpty) {
                 return 'Los nombres son requeridos';
@@ -251,6 +312,7 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
             label: 'Apellidos',
             hint: 'Ingresa tus apellidos',
             icon: Icons.person_outline,
+            enabled: widget.apellidos == null, // Solo lectura si viene del scraping
             validator: (valor) {
               if (valor == null || valor.isEmpty) {
                 return 'Los apellidos son requeridos';
@@ -263,10 +325,11 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
           // Campo de correo universitario
           _buildTextField(
             controller: _correoController,
-            label: 'Correo Universitario (10 dígitos)',
+            label: 'Correo Universitario',
             hint: '2024001234@ucss.pe',
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
+            enabled: widget.codigo == null, // Solo lectura si viene del scraping
             validator: (valor) {
               if (valor == null || valor.isEmpty) {
                 return 'El correo es requerido';
@@ -296,6 +359,7 @@ class _RegistroFormularioState extends State<RegistroFormulario> {
             items: _facultades,
             hint: 'Selecciona tu facultad',
             icon: Icons.school_outlined,
+            enabled: widget.facultad == null, // Solo lectura si viene del scraping
             onChanged: (valor) {
               setState(() {
                 _facultadSeleccionada = valor;

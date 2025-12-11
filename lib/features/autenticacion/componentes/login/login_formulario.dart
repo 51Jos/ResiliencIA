@@ -238,8 +238,8 @@ class _LoginFormularioState extends State<LoginFormulario> {
               ),
               InkWell(
                 onTap: () {
-                  // Navegar a la pantalla de registro
-                  Navigator.pushNamed(context, '/registro');
+                  // Navegar a IntranetVista para validar estudiante
+                  Navigator.pushNamed(context, '/intranet');
                 },
                 child: const Text(
                   'Crear cuenta',

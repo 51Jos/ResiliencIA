@@ -6,7 +6,18 @@ import '../componentes/registro/registro_formulario.dart';
 
 /// Vista de registro de usuarios con validación UCSS
 class RegistroVista extends StatelessWidget {
-  const RegistroVista({super.key});
+  final String? codigo;
+  final String? nombres;
+  final String? apellidos;
+  final String? facultad;
+
+  const RegistroVista({
+    super.key,
+    this.codigo,
+    this.nombres,
+    this.apellidos,
+    this.facultad,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +68,12 @@ class RegistroVista extends StatelessWidget {
                       const SizedBox(height: 40),
 
                       // Formulario de registro
-                      const RegistroFormulario(),
+                      RegistroFormulario(
+                        codigo: codigo,
+                        nombres: nombres,
+                        apellidos: apellidos,
+                        facultad: facultad,
+                      ),
                       const SizedBox(height: 24),
 
                       // Advertencia de seguridad
